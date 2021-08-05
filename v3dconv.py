@@ -106,6 +106,90 @@ class V3DTriangleGroupsColor(V3DTriangleGroups):
         assert len(color_indices) == len(position_indices)
 
 
+class V3DSphere(AV3Dobject):
+    def __init__(
+            self, center: TY_TRIPLE, radius: float, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index, None, None)
+        self.center = center
+        self.radius = radius
+
+
+class V3DHalfSphere(V3DSphere):
+    def __init__(
+            self, center: TY_TRIPLE, radius: float, polar: float, azimuth: float,
+            material_id: int = None, center_index: int = None):
+        super().__init__(center, radius, material_id, center_index)
+        self.polar = polar
+        self.azimuth = azimuth
+
+
+class V3DCylinder(AV3Dobject):
+    def __init__(
+            self, center: TY_TRIPLE, radius: float, height: float, polar: float, azimuth: float, core: bool,
+            material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index, None, None)
+        self.center = center
+        self.radius = radius
+        self.height = height
+        self.polar = polar
+        self.azimuth = azimuth
+        self.core = core
+
+
+class V3DDisk(AV3Dobject):
+    def __init__(
+            self, center: TY_TRIPLE, radius: float, polar: float, azimuth: float,
+            material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
+        self.center = center
+        self.radius = radius
+        self.polar = polar
+        self.azimuth = azimuth
+
+
+class V3DTube(AV3Dobject):
+    def __init__(
+            self, c0: TY_TRIPLE, c1: TY_TRIPLE, c2: TY_TRIPLE, c3: TY_TRIPLE, width: float, core: bool,
+            material_id: int = None, center_index: int = None,
+            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min_value, max_value)
+        self.path = (c0, c1, c2, c3)
+        self.width = width
+        self.core = core
+
+
+class V3DCurve(AV3Dobject):
+    def __init__(
+            self, z0: TY_TRIPLE, c0: TY_TRIPLE, c1: TY_TRIPLE, z1: TY_TRIPLE,
+            material_id: int = None, center_index: int = None,
+            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min_value, max_value)
+        self.z0 = z0
+        self.c0 = c0
+        self.c1 = c1
+        self.z1 = z1
+
+
+class V3DLine(AV3Dobject):
+    def __init__(
+            self, z0: TY_TRIPLE, z1: TY_TRIPLE,
+            material_id: int = None, center_index: int = None,
+            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min_value, max_value)
+        self.z0 = z0
+        self.z1 = z1
+
+
+class V3DPixel(AV3Dobject):
+    def __init__(
+            self, point: TY_TRIPLE, width: float,
+            material_id: int = None, center_index: int = None,
+            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min_value, max_value)
+        self.point = point
+        self.width = width
+
+
 class V3DReader:
     def __init__(self, fil: Union[io.FileIO, io.BytesIO, Any]):
         self.objects = []
@@ -199,6 +283,25 @@ class V3DReader:
         assert len(base_ctlpts) == 10
         return V3DBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
 
+    def process_sphere(self) -> V3DSphere:
+        center = self.unpack_triple()
+        radius = self._xdrfile.unpack_float()
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+        return V3DSphere(center, radius, material_id, center_id)
+
+    def process_half_sphere(self) -> V3DHalfSphere:
+        center = self.unpack_triple()
+        radius = self._xdrfile.unpack_float()
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        polar = self._xdrfile.unpack_float()
+        azimuth = self._xdrfile.unpack_float()
+        return V3DHalfSphere(center, radius, polar, azimuth, material_id, center_id)
+
     def process_material(self) -> V3DMaterial:
         diffuse = self.unpack_rgba_float()
         emissive = self.unpack_rgba_float()
@@ -287,6 +390,10 @@ class V3DReader:
                 self.objects.append(self.process_beziertriangle())
             elif typ == V3dTypes.V3DTYPES_BEZIERTRIANGLECOLOR:
                 self.objects.append(self.process_beziertriangle_color())
+            elif typ == V3dTypes.V3DTYPES_SPHERE:
+                self.objects.append(self.process_sphere())
+            elif typ == V3dTypes.V3DTYPES_HALFSPHERE:
+                self.objects.append(self.process_half_sphere())
             elif typ == V3dTypes.V3DTYPES_TRIANGLES:
                 self.objects.append(self.process_triangles())
             elif typ == V3dTypes.V3DTYPES_MATERIAL_:
