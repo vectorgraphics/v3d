@@ -510,6 +510,18 @@ class V3DReader:
                 self.objects.append(self.process_sphere())
             elif typ == V3dTypes.V3DTYPES_HALFSPHERE:
                 self.objects.append(self.process_half_sphere())
+            elif typ == V3dTypes.V3DTYPES_CYLINDER:
+                self.objects.append(self.process_cylinder())
+            elif typ == V3dTypes.V3DTYPES_DISK:
+                self.objects.append(self.process_disk())
+            elif typ == V3dTypes.V3DTYPES_TUBE:
+                self.objects.append(self.process_tube())
+            elif typ == V3dTypes.V3DTYPES_CURVE:
+                self.objects.append(self.process_curve())
+            elif typ == V3dTypes.V3DTYPES_LINE:
+                self.objects.append(self.process_line())
+            elif typ == V3dTypes.V3DTYPES_PIXEL_:
+                self.objects.append(self.process_pixel())
             elif typ == V3dTypes.V3DTYPES_TRIANGLES:
                 self.objects.append(self.process_triangles())
             elif typ == V3dTypes.V3DTYPES_MATERIAL_:
