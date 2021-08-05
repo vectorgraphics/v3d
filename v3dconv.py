@@ -14,12 +14,16 @@ TY_BEZIER_PATCH = Union[Tuple[
     TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE
 ], Tuple[TY_TRIPLE, ...]]
 
+TY_STRAIGHT_BEZIER_PATCH = Union[Tuple[TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE], Tuple[TY_TRIPLE, ...]]
+
 TY_BEZIER_PATCH_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
 
 TY_BEZIER_TRIANGLE = Union[Tuple[
                             TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE,
                             TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE,
                             TY_TRIPLE, TY_TRIPLE], Tuple[TY_TRIPLE, ...]]
+
+TY_STRAIGHT_BEZIER_TRIANGLE = Union[Tuple[TY_TRIPLE, TY_TRIPLE], Tuple[TY_TRIPLE, ...]]
 
 TY_BEZIER_TRIANGLE_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
 
@@ -76,6 +80,40 @@ class V3DBezierTriangle(AV3Dobject):
 class V3DBezierTriangleColor(V3DBezierPatch):
     def __init__(
             self, ctrl_points: TY_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
+            material_id: int = None, center_index: int = None,
+            min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(ctrl_points, material_id, center_index, min, max)
+        self.colors = colors
+
+
+class V3DStraightBezierPatch(AV3Dobject):
+    def __init__(
+            self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, material_id: int = None,
+            center_index: int = None, min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min, max)
+        self.control_pts = ctrl_points
+
+
+class V3DStraightBezierPatchColor(V3DStraightBezierPatch):
+    def __init__(
+            self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR,
+            material_id: int = None, center_index: int = None,
+            min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(ctrl_points, material_id, center_index, min, max)
+        self.colors = colors
+
+
+class V3DStraightBezierTriangle(AV3Dobject):
+    def __init__(
+            self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, material_id: int = None,
+            center_index: int = None, min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min, max)
+        self.control_pts = ctrl_points
+
+
+class V3DStraightBezierTriangleColor(V3DBezierPatch):
+    def __init__(
+            self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
             material_id: int = None, center_index: int = None,
             min: TY_TRIPLE = None, max: TY_TRIPLE = None):
         super().__init__(ctrl_points, material_id, center_index, min, max)
