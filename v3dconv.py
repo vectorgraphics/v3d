@@ -23,6 +23,9 @@ TY_BEZIER_TRIANGLE = Union[Tuple[
 
 TY_BEZIER_TRIANGLE_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
 
+TY_TRIANGLE_INDEX = Tuple[int, int, int]
+TY_INDICES = List[TY_TRIANGLE_INDEX]
+
 
 class AV3Dobject:
     def __init__(self, material_id: Optional[int] = None, center_index: Optional[int] = None,
@@ -79,10 +82,35 @@ class V3DBezierTriangleColor(V3DBezierPatch):
         self.colors = colors
 
 
+class V3DTriangleGroups(AV3Dobject):
+    def __init__(
+            self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE],
+            position_indices: TY_INDICES, normals_indices: TY_INDICES, material_id: int = None,
+            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(material_id, None, min_value, max_value)
+        self.positions = positions
+        self.normals = normals
+        self.position_indices = position_indices
+        self.normals_indices = normals_indices
+        assert len(position_indices) == len(normals_indices)
+
+
+class V3DTriangleGroupsColor(V3DTriangleGroups):
+    def __init__(
+            self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], colors: List[TY_RGBA],
+            position_indices: TY_INDICES, normals_indices: TY_INDICES, color_indices: TY_INDICES,
+            material_id: int = None, min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
+        super().__init__(positions, normals, position_indices, normals_indices, material_id, min_value, max_value)
+        self.colors = colors
+        self.color_indices = color_indices
+        assert len(color_indices) == len(position_indices)
+
+
 class V3DReader:
     def __init__(self, fil: Union[io.FileIO, io.BytesIO, Any]):
         self.objects = []
         self.materials = []
+        self.centers = []
 
         self.file_ver = None
         self.processed = False
@@ -178,6 +206,69 @@ class V3DReader:
         shininess, metallic, f0, _ = self.unpack_rgba_float()
         return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0)
 
+    def process_centers(self) -> List[TY_TRIPLE]:
+        number_centers = self._xdrfile.unpack_uint()
+        return self.unpack_triple_n(number_centers)
+
+    def _unpack_int_indices(self):
+        x = self._xdrfile.unpack_uint()
+        y = self._xdrfile.unpack_uint()
+        z = self._xdrfile.unpack_uint()
+        return x, y, z
+
+    def process_triangles(self) -> Union[V3DTriangleGroups, V3DTriangleGroupsColor]:
+        is_color=False
+
+        nP = self._xdrfile.unpack_uint()
+        positions = self.unpack_triple_n(nP)
+
+        nN = self._xdrfile.unpack_uint()
+        normals = self.unpack_triple_n(nN)
+
+        nC = self._xdrfile.unpack_uint()
+        colors = None
+
+        if nC > 0:
+            is_color = True
+            colors = self.unpack_rgba_float_n(nC)
+
+        pos_indices = []
+        normal_indices = []
+        color_indices = None
+
+        if is_color:
+            color_indices = []
+
+        numIdx = self._xdrfile.unpack_uint()
+        for _ in range(numIdx):
+            numTyp = self._xdrfile.unpack_uint()
+            posIdx = self._unpack_int_indices()
+            norIdx = list(posIdx)
+            colIdx = list(posIdx)
+
+            if numTyp == 1:
+                norIdx = self._unpack_int_indices()
+            elif numTyp == 2:
+                colIdx = self._unpack_int_indices()
+            elif numTyp == 3:
+                norIdx = self._unpack_int_indices()
+                colIdx = self._unpack_int_indices()
+
+            pos_indices.append(tuple(posIdx))
+            normal_indices.append(tuple(norIdx))
+            if is_color:
+                color_indices.append(tuple(colIdx))
+
+        material_id = self._xdrfile.unpack_uint()
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        if is_color:
+            return V3DTriangleGroupsColor(positions, normals, colors, pos_indices,
+                                          normal_indices, color_indices, material_id, min_val, max_val)
+        else:
+            return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id, min_val, max_val)
+
     def process(self, force: bool = False):
         if self.processed and not force:
             return
@@ -196,62 +287,19 @@ class V3DReader:
                 self.objects.append(self.process_beziertriangle())
             elif typ == V3dTypes.V3DTYPES_BEZIERTRIANGLECOLOR:
                 self.objects.append(self.process_beziertriangle_color())
+            elif typ == V3dTypes.V3DTYPES_TRIANGLES:
+                self.objects.append(self.process_triangles())
             elif typ == V3dTypes.V3DTYPES_MATERIAL_:
                 self.materials.append(self.process_material())
+            elif typ == V3dTypes.V3DTYPES_CENTERS:
+                self.centers = self.process_centers()
 
         self._xdrfile.done()
         self.processed = True
 
 
-def process_triangles(xdr: xdrlib.Unpacker, objfile: io.FileIO, base_offset: int):
-    nP = xdr.unpack_uint()
-    positions = xdr.unpack_farray(3 * nP, lambda: xdr.unpack_double())
-
-    for i in range(nP):
-        x, y, z = positions[3 * i:3 * i + 3]
-        objfile.write('v {0} {1} {2}\n'.format(x / 100, y / 100, z / 100))
-
-    nN = xdr.unpack_uint()
-    normals = xdr.unpack_farray(3 * nN, lambda: xdr.unpack_double())
-
-    for i in range(nP):
-        x, y, z = normals[3 * i:3 * i + 3]
-        objfile.write('vn {0} {1} {2}\n'.format(x, y, z))
-
-    nC = xdr.unpack_uint()
-    colors = xdr.unpack_farray(4 * nC, lambda: xdr.unpack_double())
-
-    numIdx = xdr.unpack_uint()
-    for _ in range(numIdx):
-        numTyp = xdr.unpack_uint()
-        posIdx = xdr.unpack_farray(3, lambda: xdr.unpack_uint())
-        norIdx = list(posIdx)
-        colIdx = list(posIdx)
-
-        if numTyp == 1:
-            norIdx = xdr.unpack_farray(3, lambda: xdr.unpack_uint())
-        elif numTyp == 2:
-            colIdx = xdr.unpack_farray(3, lambda: xdr.unpack_uint())
-        elif numTyp == 3:
-            norIdx = xdr.unpack_farray(3, lambda: xdr.unpack_uint())
-            colIdx = xdr.unpack_farray(3, lambda: xdr.unpack_uint())
-
-        ix, iy, iz = posIdx
-        inx, iny, inz = norIdx
-        objfile.write('f {0}//{3} {1}//{4} {2}//{5}\n'.format(
-            ix + base_offset + 1, iy + base_offset + 1, iz + base_offset + 1,
-            inx + base_offset + 1, iny + base_offset + 1, inz + base_offset + 1))
-        # print('posIdx=' + str(posIdx))
-        # print('norIdx=' + str(norIdx))
-
-    print('materialIndex={0}'.format(xdr.unpack_uint()))
-    print('min={0}'.format(xdr.unpack_farray(3, lambda: xdr.unpack_double())))
-    print('max={0}'.format(xdr.unpack_farray(3, lambda: xdr.unpack_double())))
-    return nP
-
-
 def main():
-    with io.open('teapot.v3d', 'rb') as fil:
+    with io.open('out_bake.v3d', 'rb') as fil:
         v3d_obj = V3DReader(fil)
     v3d_obj.process()
     pass
