@@ -14,6 +14,8 @@ TY_BEZIER_PATCH = Union[Tuple[
     TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE
 ], Tuple[TY_TRIPLE, ...]]
 
+TY_BEZIER_PATCH_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
+
 
 class AV3Dobject:
     def __init__(self, material_id: Optional[int] = None, center_index: Optional[int] = None,
@@ -44,84 +46,108 @@ class V3DBezierPatch(AV3Dobject):
         self.control_pts = ctrl_points
 
 
-class V3DColorBezierPatch(V3DBezierPatch):
+class V3DBezierPatchColor(V3DBezierPatch):
     def __init__(
-            self, ctrl_points: TY_BEZIER_PATCH, colors: Tuple[TY_RGBA, TY_RGBA, TY_RGBA, TY_RGBA],
+            self, ctrl_points: TY_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR,
             material_id: int = None, center_index: int = None,
             min: TY_TRIPLE = None, max: TY_TRIPLE = None):
         super().__init__(ctrl_points, material_id, center_index, min, max)
         self.colors = colors
 
 
-class V3DBezierPatch(AV3Dobject):
-    def __init__(
-            self, ctrl_points: TY_BEZIER_PATCH, material_id: int = None,
-            center_index: int = None, min: TY_TRIPLE = None, max: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min, max)
-        self.control_pts = ctrl_points
+class V3DReader:
+    def __init__(self, fil: Union[io.FileIO, io.BytesIO]):
+        self.objects = []
+        self.materials = []
 
+        self.file_ver = None
+        self.processed = False
 
-def get_objtype(xdr: xdrlib.Unpacker) -> Union[None, int]:
-    try:
-        typ = xdr.unpack_uint()  # XDR does not support short
-        return typ
-    except EOFError:
-        return None
+        self._xdrfile = xdrlib.Unpacker(fil.read())
 
+    def get_objtype(self) -> Optional[int]:
+        try:
+            typ = self._xdrfile.unpack_uint()  # XDR does not support short
+            return typ
+        except EOFError:
+            return None
 
-def unpack_triple(xdr: xdrlib.Unpacker) -> TY_TRIPLE:
-    x = xdr.unpack_double()
-    y = xdr.unpack_double()
-    z = xdr.unpack_double()
-    return x, y, z
+    def unpack_triple(self) -> TY_TRIPLE:
+        x = self._xdrfile.unpack_double()
+        y = self._xdrfile.unpack_double()
+        z = self._xdrfile.unpack_double()
+        return x, y, z
 
+    def unpack_rgba_float(self) -> TY_RGBA:
+        r = self._xdrfile.unpack_float()
+        g = self._xdrfile.unpack_float()
+        b = self._xdrfile.unpack_float()
+        a = self._xdrfile.unpack_float()
+        return r, g, b, a
 
-def unpack_rgba_float(xdr: xdrlib.Unpacker) -> TY_RGBA:
-    r = xdr.unpack_float()
-    g = xdr.unpack_float()
-    b = xdr.unpack_float()
-    a = xdr.unpack_float()
-    return r, g, b, a
+    def unpack_triple_n(self, n: int) -> List[TY_TRIPLE]:
+        final_list = []
+        for _ in range(n):
+            final_list.append(self.unpack_triple())
+        return final_list
 
+    def unpack_rgba_float_n(self, n: int) -> List[TY_RGBA]:
+        final_list = []
+        for _ in range(n):
+            final_list.append(self.unpack_rgba_float())
+        return final_list
 
-def unpack_triple_n(xdr: xdrlib.Unpacker, n: int = 1) -> List[TY_TRIPLE]:
-    final_list = []
-    for _ in range(n):
-        final_list.append(unpack_triple(xdr))
-    return final_list
+    def process_bezierpatch(self) -> V3DBezierPatch:
+        base_ctlpts = self.unpack_triple_n(16)
 
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
 
-def process_bezierpatch_no_color(xdr: xdrlib.Unpacker):
-    base_ctlpts = unpack_triple_n(xdr, 16)
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
 
-    center_id = xdr.unpack_uint()
-    material_id = xdr.unpack_uint()
+        assert len(base_ctlpts) == 16
+        return V3DBezierPatch(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
 
-    min_val = unpack_triple(xdr)
-    max_val = unpack_triple(xdr)
+    def process_bezierpatch_color(self) -> V3DBezierPatchColor:
+        base_ctlpts = self.unpack_triple_n(16)
 
-    assert len(base_ctlpts) == 16
-    return V3DBezierPatch(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
 
+        colors = self.unpack_rgba_float_n(4)
 
-def process_bezierPatch(xdr: xdrlib.Unpacker):
-    base_ctlpts = []
-    for _ in range(16):
-        base_ctlpts.append(unpack_triple(xdr))
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+        assert len(base_ctlpts) == 16
+        return V3DBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
 
-    center_id = xdr.unpack_uint()
-    material_id = xdr.unpack_uint()
-    assert len(base_ctlpts) == 16
-    return V3DBezierPatch(tuple(base_ctlpts), material_id, center_id)
+    def process_material(self) -> V3DMaterial:
+        diffuse = self.unpack_rgba_float()
+        emissive = self.unpack_rgba_float()
+        specular = self.unpack_rgba_float()
+        shininess, metallic, f0, _ = self.unpack_rgba_float()
+        return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0)
 
+    def process(self, force: bool = False):
+        if self.processed and not force:
+            return
 
-def process_material(xdr: xdrlib.Unpacker):
-    diffuse = unpack_rgba_float(xdr)
-    emissive = unpack_rgba_float(xdr)
-    specular = unpack_rgba_float(xdr)
-    shininess, metallic, f0, _ = unpack_rgba_float(xdr)
-    return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0)
+        if self.processed and force:
+            self._xdrfile.set_position(0)
 
+        self.file_ver = self._xdrfile.unpack_uint()
+
+        while typ := self.get_objtype():
+            if typ == V3dTypes.V3DTYPES_BEZIERPATCH:
+                self.objects.append(self.process_bezierpatch())
+            elif typ == V3dTypes.V3DTYPES_BEZIERPATCHCOLOR:
+                self.objects.append(self.process_bezierpatch_color())
+            elif typ == V3dTypes.V3DTYPES_MATERIAL_:
+                self.materials.append(self.process_material())
+
+        self._xdrfile.done()
+        self.processed = True
 
 
 def process_triangles(xdr: xdrlib.Unpacker, objfile: io.FileIO, base_offset: int):
@@ -172,22 +198,9 @@ def process_triangles(xdr: xdrlib.Unpacker, objfile: io.FileIO, base_offset: int
 
 
 def main():
-    filename = 'teapot'
-    obj_lists = []
-    materials = []
-    with io.open(filename + '.v3d', 'rb') as fil:
-        unpkg = xdrlib.Unpacker(fil.read())
-
-    print('ver: ' + str(unpkg.unpack_uint()))
-
-    while typ := get_objtype(unpkg):
-        if typ == V3dTypes.V3DTYPES_BEZIERPATCH:
-            obj_lists.append(process_bezierpatch_no_color(unpkg))
-        elif typ == V3dTypes.V3DTYPES_BEZIERPATCHCOLOR:
-            process_bezierPatch(unpkg)
-        elif typ == V3dTypes.V3DTYPES_MATERIAL_:
-            materials.append(process_material(unpkg))
-
+    with io.open('teapot.v3d', 'rb') as fil:
+        v3d_obj = V3DReader(fil)
+    v3d_obj.process()
     pass
 
 
