@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import xdrlib
 import io
-from typing import Union, Tuple, Optional, List
+from typing import Union, Tuple, Optional, List, Any
 from generated_enums import V3dTypes
 
 TY_TRIPLE = Tuple[float, float, float]
@@ -15,6 +15,13 @@ TY_BEZIER_PATCH = Union[Tuple[
 ], Tuple[TY_TRIPLE, ...]]
 
 TY_BEZIER_PATCH_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
+
+TY_BEZIER_TRIANGLE = Union[Tuple[
+                            TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE,
+                            TY_TRIPLE, TY_TRIPLE, TY_TRIPLE, TY_TRIPLE,
+                            TY_TRIPLE, TY_TRIPLE], Tuple[TY_TRIPLE, ...]]
+
+TY_BEZIER_TRIANGLE_COLOR = Union[Tuple[TY_RGBA, TY_RGBA, TY_RGBA], Tuple[TY_RGBA, ...]]
 
 
 class AV3Dobject:
@@ -55,8 +62,25 @@ class V3DBezierPatchColor(V3DBezierPatch):
         self.colors = colors
 
 
+class V3DBezierTriangle(AV3Dobject):
+    def __init__(
+            self, ctrl_points: TY_BEZIER_TRIANGLE, material_id: int = None,
+            center_index: int = None, min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(material_id, center_index, min, max)
+        self.control_pts = ctrl_points
+
+
+class V3DBezierTriangleColor(V3DBezierPatch):
+    def __init__(
+            self, ctrl_points: TY_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
+            material_id: int = None, center_index: int = None,
+            min: TY_TRIPLE = None, max: TY_TRIPLE = None):
+        super().__init__(ctrl_points, material_id, center_index, min, max)
+        self.colors = colors
+
+
 class V3DReader:
-    def __init__(self, fil: Union[io.FileIO, io.BytesIO]):
+    def __init__(self, fil: Union[io.FileIO, io.BytesIO, Any]):
         self.objects = []
         self.materials = []
 
@@ -122,6 +146,31 @@ class V3DReader:
         assert len(base_ctlpts) == 16
         return V3DBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
 
+    def process_beziertriangle(self) -> V3DBezierTriangle:
+        base_ctlpts = self.unpack_triple_n(10)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        assert len(base_ctlpts) == 10
+        return V3DBezierTriangle(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+
+    def process_beziertriangle_color(self) -> V3DBezierTriangleColor:
+        base_ctlpts = self.unpack_triple_n(10)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        colors = self.unpack_rgba_float_n(3)
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+        assert len(base_ctlpts) == 10
+        return V3DBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+
     def process_material(self) -> V3DMaterial:
         diffuse = self.unpack_rgba_float()
         emissive = self.unpack_rgba_float()
@@ -143,6 +192,10 @@ class V3DReader:
                 self.objects.append(self.process_bezierpatch())
             elif typ == V3dTypes.V3DTYPES_BEZIERPATCHCOLOR:
                 self.objects.append(self.process_bezierpatch_color())
+            if typ == V3dTypes.V3DTYPES_BEZIERTRIANGLE:
+                self.objects.append(self.process_beziertriangle())
+            elif typ == V3dTypes.V3DTYPES_BEZIERTRIANGLECOLOR:
+                self.objects.append(self.process_beziertriangle_color())
             elif typ == V3dTypes.V3DTYPES_MATERIAL_:
                 self.materials.append(self.process_material())
 
