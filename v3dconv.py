@@ -259,6 +259,10 @@ class V3DReader:
         a = self._xdrfile.unpack_float()
         return r, g, b, a
 
+    def unpack_bool(self) -> bool:
+        base = self._xdrfile.unpack_uint()
+        return base != 0
+
     def unpack_triple_n(self, n: int) -> List[TY_TRIPLE]:
         final_list = []
         for _ in range(n):
@@ -339,6 +343,80 @@ class V3DReader:
         polar = self._xdrfile.unpack_float()
         azimuth = self._xdrfile.unpack_float()
         return V3DHalfSphere(center, radius, polar, azimuth, material_id, center_id)
+
+    def process_cylinder(self) -> V3DCylinder:
+        center = self.unpack_triple()
+        radius = self._xdrfile.unpack_double()
+        height = self._xdrfile.unpack_double()
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        polar = self._xdrfile.unpack_double()
+        azimuth = self._xdrfile.unpack_double()
+        core_base = self.unpack_bool()
+
+        return V3DCylinder(center, radius, height, polar, azimuth, core_base, material_id, center_id)
+
+    def process_disk(self) -> V3DDisk:
+        center = self.unpack_triple()
+        radius = self._xdrfile.unpack_double()
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        polar = self._xdrfile.unpack_double()
+        azimuth = self._xdrfile.unpack_double()
+
+        return V3DDisk(center, radius, polar, azimuth, material_id, center_id)
+
+    def process_tube(self) -> V3DTube:
+        points = self.unpack_triple_n(4)
+        width = self._xdrfile.unpack_double()
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+        core_base = self.unpack_bool()
+
+        return V3DTube(points[0], points[1], points[2], points[3],
+                       width, core_base, material_id, center_id, min_val, max_val)
+
+    def process_curve(self) -> V3DCurve:
+        points = self.unpack_triple_n(4)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        return V3DCurve(points[0], points[1], points[2], points[3],
+                        material_id, center_id, min_val, max_val)
+
+    def process_line(self) -> V3DLine:
+        points = self.unpack_triple_n(2)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        return V3DLine(points[0], points[1], material_id, center_id, min_val, max_val)
+
+    def process_pixel(self) -> V3DPixel:
+        point = self.unpack_triple()
+        width = self._xdrfile.unpack_double()
+
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        return V3DPixel(point, width, material_id, None, min_val, max_val)
 
     def process_material(self) -> V3DMaterial:
         diffuse = self.unpack_rgba_float()
