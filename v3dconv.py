@@ -325,6 +325,58 @@ class V3DReader:
         assert len(base_ctlpts) == 10
         return V3DBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
 
+    def process_straight_bezierpatch(self) -> V3DStraightBezierPatch:
+        base_ctlpts = self.unpack_triple_n(4)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        assert len(base_ctlpts) == 4
+        return V3DStraightBezierPatch(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+
+    def process_straight_bezierpatch_color(self) -> V3DStraightBezierPatchColor:
+        base_ctlpts = self.unpack_triple_n(4)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        colors = self.unpack_rgba_float_n(4)
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+        assert len(base_ctlpts) == 4
+        return V3DStraightBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+
+    def process_straight_beziertriangle(self) -> V3DStraightBezierTriangle:
+        base_ctlpts = self.unpack_triple_n(3)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+
+        assert len(base_ctlpts) == 3
+        return V3DStraightBezierTriangle(
+            tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+
+    def process_straight_beziertriangle_color(self) -> V3DStraightBezierTriangleColor:
+        base_ctlpts = self.unpack_triple_n(3)
+
+        center_id = self._xdrfile.unpack_uint()
+        material_id = self._xdrfile.unpack_uint()
+
+        colors = self.unpack_rgba_float_n(3)
+
+        min_val = self.unpack_triple()
+        max_val = self.unpack_triple()
+        assert len(base_ctlpts) == 3
+        return V3DStraightBezierTriangleColor(
+            tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+
     def process_sphere(self) -> V3DSphere:
         center = self.unpack_triple()
         radius = self._xdrfile.unpack_double()
@@ -506,6 +558,14 @@ class V3DReader:
                 self.objects.append(self.process_beziertriangle())
             elif typ == V3dTypes.V3DTYPES_BEZIERTRIANGLECOLOR:
                 self.objects.append(self.process_beziertriangle_color())
+            if typ == V3dTypes.V3DTYPES_QUAD:
+                self.objects.append(self.process_straight_bezierpatch())
+            elif typ == V3dTypes.V3DTYPES_QUADCOLOR:
+                self.objects.append(self.process_straight_bezierpatch_color())
+            if typ == V3dTypes.V3DTYPES_TRIANGLE:
+                self.objects.append(self.process_straight_beziertriangle())
+            elif typ == V3dTypes.V3DTYPES_TRIANGLECOLOR:
+                self.objects.append(self.process_straight_beziertriangle_color())
             elif typ == V3dTypes.V3DTYPES_SPHERE:
                 self.objects.append(self.process_sphere())
             elif typ == V3dTypes.V3DTYPES_HALFSPHERE:
