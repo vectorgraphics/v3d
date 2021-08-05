@@ -327,7 +327,7 @@ class V3DReader:
 
     def process_sphere(self) -> V3DSphere:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_float()
+        radius = self._xdrfile.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
@@ -335,13 +335,13 @@ class V3DReader:
 
     def process_half_sphere(self) -> V3DHalfSphere:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_float()
+        radius = self._xdrfile.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        polar = self._xdrfile.unpack_float()
-        azimuth = self._xdrfile.unpack_float()
+        polar = self._xdrfile.unpack_double()
+        azimuth = self._xdrfile.unpack_double()
         return V3DHalfSphere(center, radius, polar, azimuth, material_id, center_id)
 
     def process_cylinder(self) -> V3DCylinder:
