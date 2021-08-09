@@ -2,7 +2,7 @@
 import xdrlib
 import io
 from typing import Union, Tuple, Optional, List, Any
-from generated_enums import V3dTypes
+from enums.v3dtypes import v3dtypes
 
 TY_TRIPLE = Tuple[float, float, float]
 TY_RGBA = Tuple[float, float, float, float]
@@ -274,6 +274,14 @@ class V3DReader:
         for _ in range(n):
             final_list.append(self.unpack_rgba_float())
         return final_list
+
+    def process_header(self):
+        num_headers = self._xdrfile.unpack_uint()
+        for _ in range(num_headers):
+            header_type = self._xdrfile.unpack_uint()
+            block_count = self._xdrfile.unpack_uint()
+            for _ in range(block_count):
+                dummy = self._xdrfile.unpack_uint()
 
     def process_bezierpatch(self) -> V3DBezierPatch:
         base_ctlpts = self.unpack_triple_n(16)
@@ -550,51 +558,53 @@ class V3DReader:
         self.file_ver = self._xdrfile.unpack_uint()
 
         while typ := self.get_objtype():
-            if typ == V3dTypes.V3DTYPES_BEZIERPATCH:
+            if typ == v3dtypes.v3dtypes_bezierPatch:
                 self.objects.append(self.process_bezierpatch())
-            elif typ == V3dTypes.V3DTYPES_BEZIERPATCHCOLOR:
+            elif typ == v3dtypes.v3dtypes_bezierPatchColor:
                 self.objects.append(self.process_bezierpatch_color())
-            if typ == V3dTypes.V3DTYPES_BEZIERTRIANGLE:
+            if typ == v3dtypes.v3dtypes_bezierTriangle:
                 self.objects.append(self.process_beziertriangle())
-            elif typ == V3dTypes.V3DTYPES_BEZIERTRIANGLECOLOR:
+            elif typ == v3dtypes.v3dtypes_bezierTriangleColor:
                 self.objects.append(self.process_beziertriangle_color())
-            if typ == V3dTypes.V3DTYPES_QUAD:
+            if typ == v3dtypes.v3dtypes_quad:
                 self.objects.append(self.process_straight_bezierpatch())
-            elif typ == V3dTypes.V3DTYPES_QUADCOLOR:
+            elif typ == v3dtypes.v3dtypes_quadColor:
                 self.objects.append(self.process_straight_bezierpatch_color())
-            if typ == V3dTypes.V3DTYPES_TRIANGLE:
+            if typ == v3dtypes.v3dtypes_triangle:
                 self.objects.append(self.process_straight_beziertriangle())
-            elif typ == V3dTypes.V3DTYPES_TRIANGLECOLOR:
+            elif typ == v3dtypes.v3dtypes_triangleColor:
                 self.objects.append(self.process_straight_beziertriangle_color())
-            elif typ == V3dTypes.V3DTYPES_SPHERE:
+            elif typ == v3dtypes.v3dtypes_sphere:
                 self.objects.append(self.process_sphere())
-            elif typ == V3dTypes.V3DTYPES_HALFSPHERE:
+            elif typ == v3dtypes.v3dtypes_halfSphere:
                 self.objects.append(self.process_half_sphere())
-            elif typ == V3dTypes.V3DTYPES_CYLINDER:
+            elif typ == v3dtypes.v3dtypes_cylinder:
                 self.objects.append(self.process_cylinder())
-            elif typ == V3dTypes.V3DTYPES_DISK:
+            elif typ == v3dtypes.v3dtypes_disk:
                 self.objects.append(self.process_disk())
-            elif typ == V3dTypes.V3DTYPES_TUBE:
+            elif typ == v3dtypes.v3dtypes_tube:
                 self.objects.append(self.process_tube())
-            elif typ == V3dTypes.V3DTYPES_CURVE:
+            elif typ == v3dtypes.v3dtypes_curve:
                 self.objects.append(self.process_curve())
-            elif typ == V3dTypes.V3DTYPES_LINE:
+            elif typ == v3dtypes.v3dtypes_line:
                 self.objects.append(self.process_line())
-            elif typ == V3dTypes.V3DTYPES_PIXEL_:
+            elif typ == v3dtypes.v3dtypes_pixel_:
                 self.objects.append(self.process_pixel())
-            elif typ == V3dTypes.V3DTYPES_TRIANGLES:
+            elif typ == v3dtypes.v3dtypes_triangles:
                 self.objects.append(self.process_triangles())
-            elif typ == V3dTypes.V3DTYPES_MATERIAL_:
+            elif typ == v3dtypes.v3dtypes_material_:
                 self.materials.append(self.process_material())
-            elif typ == V3dTypes.V3DTYPES_CENTERS:
+            elif typ == v3dtypes.v3dtypes_centers:
                 self.centers = self.process_centers()
+            elif typ == v3dtypes.v3dtypes_header:
+                self.process_header()
 
         self._xdrfile.done()
         self.processed = True
 
 
 def main():
-    with io.open('out_bake.v3d', 'rb') as fil:
+    with io.open('teapot.v3d', 'rb') as fil:
         v3d_obj = V3DReader(fil)
     v3d_obj.process()
     pass
