@@ -4,6 +4,7 @@ import gzip
 from typing import Union, Tuple, Optional, List, Callable
 from enums.v3dtypes import v3dtypes
 
+TY_PAIR = Tuple[float, float]
 TY_TRIPLE = Tuple[float, float, float]
 TY_RGBA = Tuple[float, float, float, float]
 
@@ -230,12 +231,12 @@ class V3DPixel(AV3Dobject):
 
 class V3DReader:
     def __init__(self, fil: gzip.GzipFile):
-        self._objects = []
-        self._materials = []
-        self._centers = []
+        self._objects: List[AV3Dobject] = []
+        self._materials: List[V3DMaterial] = []
+        self._centers: List[TY_TRIPLE] = []
 
-        self._file_ver = None
-        self._processed = False
+        self._file_ver: Optional[int] = None
+        self._processed: bool = False
 
         self._object_process_fns: dict[int, Callable[[], AV3Dobject]] = {
             v3dtypes.v3dtypes_bezierPatch: self.process_bezierpatch,
@@ -258,8 +259,8 @@ class V3DReader:
         }
 
         self._xdrfile = xdrlib.Unpacker(fil.read())
-        self.unpack_double = self._xdrfile.unpack_double
-        self._allow_double_precision = True
+        self.unpack_double: Callable[[], float] = self._xdrfile.unpack_double
+        self._allow_double_precision: bool = True
 
     @classmethod
     def from_file_name(cls, file_name: str):
@@ -268,31 +269,36 @@ class V3DReader:
         return reader_obj
 
     @property
-    def processed(self):
+    def processed(self) -> bool:
         return self._processed
 
     @property
-    def objects(self):
+    def header(self) -> V3DHeaderInformation:
+        self.process()
+        return self._header
+
+    @property
+    def objects(self) -> List[AV3Dobject]:
         self.process()
         return self._objects
 
     @property
-    def materials(self):
+    def materials(self) -> List[V3DMaterial]:
         self.process()
         return self._materials
 
     @property
-    def centers(self):
+    def centers(self) -> List[TY_TRIPLE]:
         self.process()
         return self._centers
 
     @property
-    def file_version(self):
+    def file_version(self) -> Optional[bool]:
         self.process()
         return self._file_ver
 
     @property
-    def allow_double_precision(self):
+    def allow_double_precision(self) -> Optional[float]:
         self.process()
         return self._allow_double_precision
 
@@ -616,6 +622,7 @@ class V3DReader:
         if self._processed and force:
             self._xdrfile.set_position(0)
 
+        self._processed = True
         self._file_ver = self._xdrfile.unpack_uint()
 
         self._allow_double_precision = self.unpack_bool()
@@ -638,7 +645,6 @@ class V3DReader:
                     raise RuntimeError('Unknown Object type. Received type {0}'.format(typ))
 
         self._xdrfile.done()
-        self._processed = True
 
 
 def main():
