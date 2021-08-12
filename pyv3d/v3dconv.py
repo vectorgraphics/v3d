@@ -3,6 +3,7 @@ import xdrlib
 import gzip
 from typing import Union, Tuple, Optional, List, Callable
 from enums.v3dtypes import v3dtypes
+from enums.v3dheadertypes import v3dheadertypes
 
 TY_PAIR = Tuple[float, float]
 TY_TRIPLE = Tuple[float, float, float]
@@ -51,6 +52,40 @@ class V3DMaterial(AV3Dobject):
         self.metallic = metallic
         self.shininess = shininess
         self.f0 = f0
+
+
+class V3DSingleLightSource:
+    def __init__(self, position: TY_TRIPLE, color: TY_RGBA):
+        self.position = position
+        self.color = color
+
+
+class V3DConfigurationValue:
+    def __init__(self):
+        self.absolute: Optional[bool] = None
+        self.zoom_factor: Optional[float] = None
+        self.zoom_pinch_factor: Optional[float] = None
+        self.zoom_pinch_cap: Optional[float] = None
+        self.zoom_step: Optional[float] = None
+        self.shift_hold_distance: Optional[float] = None
+        self.shift_wait_time: Optional[float] = None
+        self.vibrate_time: Optional[float] = None
+
+
+class V3DHeaderInformation:
+    def __init__(self):
+        self.canvas_width: Optional[int] = None
+        self.canvas_height: Optional[int] = None
+        self.b: Optional[TY_TRIPLE] = None
+        self.B: Optional[TY_TRIPLE] = None
+        self.orthographic: Optional[bool] = None
+        self.angle: Optional[float] = None
+        self.Zoom0: Optional[float] = None
+        self.viewport_margin: Optional[TY_PAIR] = None
+        self.viewport_shift: TY_PAIR = (0.0, 0.0)
+        self.lights: List[V3DSingleLightSource] = []
+        self.background: TY_RGBA = (1.0, 1.0, 1.0, 1.0)
+        self.configuration: V3DConfigurationValue = V3DConfigurationValue()
 
 
 class V3DBezierPatch(AV3Dobject):
@@ -234,6 +269,7 @@ class V3DReader:
         self._objects: List[AV3Dobject] = []
         self._materials: List[V3DMaterial] = []
         self._centers: List[TY_TRIPLE] = []
+        self._header: V3DHeaderInformation = V3DHeaderInformation()
 
         self._file_ver: Optional[int] = None
         self._processed: bool = False
@@ -315,6 +351,11 @@ class V3DReader:
         z = self.unpack_double()
         return x, y, z
 
+    def unpack_pair(self) -> TY_PAIR:
+        x = self.unpack_double()
+        y = self.unpack_double()
+        return x, y
+
     def unpack_rgba_float(self) -> TY_RGBA:
         r = self._xdrfile.unpack_float()
         g = self._xdrfile.unpack_float()
@@ -338,13 +379,56 @@ class V3DReader:
             final_list.append(self.unpack_rgba_float())
         return final_list
 
-    def process_header(self):
+    def process_header(self) -> V3DHeaderInformation:
+        header = V3DHeaderInformation()
         num_headers = self._xdrfile.unpack_uint()
         for _ in range(num_headers):
             header_type = self._xdrfile.unpack_uint()
             block_count = self._xdrfile.unpack_uint()
-            for _ in range(block_count):
-                dummy = self._xdrfile.unpack_uint()
+
+            if header_type == v3dheadertypes.v3dheadertypes_canvasWidth:
+                header.canvas_width = self._xdrfile.unpack_uint()
+            elif header_type == v3dheadertypes.v3dheadertypes_canvasHeight:
+                header.canvas_height = self._xdrfile.unpack_uint()
+            elif header_type == v3dheadertypes.v3dheadertypes_b:
+                header.b = self.unpack_triple()
+            elif header_type == v3dheadertypes.v3dheadertypes_B:
+                header.B = self.unpack_triple()
+            elif header_type == v3dheadertypes.v3dheadertypes_orthographic:
+                header.orthographic = self.unpack_bool()
+            elif header_type == v3dheadertypes.v3dheadertypes_angle_:
+                header.angle = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_Zoom0:
+                header.Zoom0 = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_viewportMargin:
+                header.viewport_margin = self.unpack_pair()
+            elif header_type == v3dheadertypes.v3dheadertypes_viewportShift:
+                header.viewport_shift = self.unpack_pair()
+            elif header_type == v3dheadertypes.v3dheadertypes_light:
+                position = self.unpack_triple()
+                color = self.unpack_rgba_float()
+                header.lights.append(V3DSingleLightSource(position, color))
+            elif header_type == v3dheadertypes.v3dheadertypes_background:
+                header.background = self.unpack_rgba_float()
+            elif header_type == v3dheadertypes.v3dheadertypes_absolute:
+                # Configuration from now on
+                header.configuration.absolute = self.unpack_bool()
+            elif header_type == v3dheadertypes.v3dheadertypes_zoomFactor:
+                header.configuration.zoom_factor = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_zoomPinchFactor:
+                header.configuration.zoom_pinch_factor = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_zoomStep:
+                header.configuration.zoom_step = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_shiftHoldDistance:
+                header.configuration.shift_hold_distance = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_shiftWaitTime:
+                header.configuration.shift_wait_time = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_vibrateTime:
+                header.configuration.vibrate_time = self.unpack_double()
+            else:
+                for _ in range(block_count):
+                    self._xdrfile.unpack_uint()
+        return header
 
     def process_bezierpatch(self) -> V3DBezierPatch:
         base_ctlpts = self.unpack_triple_n(16)
@@ -635,7 +719,7 @@ class V3DReader:
             elif typ == v3dtypes.v3dtypes_centers:
                 self._centers = self.process_centers()
             elif typ == v3dtypes.v3dtypes_header:
-                self.process_header()
+                self._header = self.process_header()
             else:
                 fn = self.get_fn_process_type(typ)
                 if fn is not None:
