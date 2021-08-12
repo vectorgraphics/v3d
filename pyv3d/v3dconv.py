@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import xdrlib
 import gzip
-from typing import Union, Tuple, Optional, List
+from typing import Union, Tuple, Optional, List, Callable
 from enums.v3dtypes import v3dtypes
 
 TY_TRIPLE = Tuple[float, float, float]
@@ -236,6 +236,26 @@ class V3DReader:
 
         self._file_ver = None
         self._processed = False
+
+        self._object_process_fns: dict[int, Callable[[], AV3Dobject]] = {
+            v3dtypes.v3dtypes_bezierPatch: self.process_bezierpatch,
+            v3dtypes.v3dtypes_bezierPatchColor: self.process_bezierpatch_color,
+            v3dtypes.v3dtypes_bezierTriangle: self.process_beziertriangle,
+            v3dtypes.v3dtypes_bezierTriangleColor: self.process_beziertriangle_color,
+            v3dtypes.v3dtypes_quad: self.process_straight_bezierpatch,
+            v3dtypes.v3dtypes_quadColor: self.process_straight_bezierpatch_color,
+            v3dtypes.v3dtypes_triangle: self.process_straight_beziertriangle,
+            v3dtypes.v3dtypes_triangleColor: self.process_straight_beziertriangle_color,
+            v3dtypes.v3dtypes_sphere: self.process_sphere,
+            v3dtypes.v3dtypes_halfSphere: self.process_half_sphere,
+            v3dtypes.v3dtypes_cylinder: self.process_cylinder,
+            v3dtypes.v3dtypes_disk: self.process_disk,
+            v3dtypes.v3dtypes_tube: self.process_tube,
+            v3dtypes.v3dtypes_curve: self.process_curve,
+            v3dtypes.v3dtypes_line: self.process_line,
+            v3dtypes.v3dtypes_pixel_: self.process_pixel,
+            v3dtypes.v3dtypes_triangles: self.process_triangles
+        }
 
         self._xdrfile = xdrlib.Unpacker(fil.read())
         self.unpack_double = self._xdrfile.unpack_double
@@ -586,6 +606,9 @@ class V3DReader:
             return V3DTriangleGroups(positions, normals, pos_indices,
                                      normal_indices, material_id, min_val, max_val)
 
+    def get_fn_process_type(self, typ: int) -> Optional[Callable[[], AV3Dobject]]:
+        return self._object_process_fns.get(typ, None)
+
     def process(self, force: bool = False):
         if self._processed and not force:
             return
@@ -600,53 +623,26 @@ class V3DReader:
             self.unpack_double = self._xdrfile.unpack_float
 
         while typ := self.get_obj_type():
-            if typ == v3dtypes.v3dtypes_bezierPatch:
-                self._objects.append(self.process_bezierpatch())
-            elif typ == v3dtypes.v3dtypes_bezierPatchColor:
-                self._objects.append(self.process_bezierpatch_color())
-            if typ == v3dtypes.v3dtypes_bezierTriangle:
-                self._objects.append(self.process_beziertriangle())
-            elif typ == v3dtypes.v3dtypes_bezierTriangleColor:
-                self._objects.append(self.process_beziertriangle_color())
-            if typ == v3dtypes.v3dtypes_quad:
-                self._objects.append(self.process_straight_bezierpatch())
-            elif typ == v3dtypes.v3dtypes_quadColor:
-                self._objects.append(self.process_straight_bezierpatch_color())
-            if typ == v3dtypes.v3dtypes_triangle:
-                self._objects.append(self.process_straight_beziertriangle())
-            elif typ == v3dtypes.v3dtypes_triangleColor:
-                self._objects.append(self.process_straight_beziertriangle_color())
-            elif typ == v3dtypes.v3dtypes_sphere:
-                self._objects.append(self.process_sphere())
-            elif typ == v3dtypes.v3dtypes_halfSphere:
-                self._objects.append(self.process_half_sphere())
-            elif typ == v3dtypes.v3dtypes_cylinder:
-                self._objects.append(self.process_cylinder())
-            elif typ == v3dtypes.v3dtypes_disk:
-                self._objects.append(self.process_disk())
-            elif typ == v3dtypes.v3dtypes_tube:
-                self._objects.append(self.process_tube())
-            elif typ == v3dtypes.v3dtypes_curve:
-                self._objects.append(self.process_curve())
-            elif typ == v3dtypes.v3dtypes_line:
-                self._objects.append(self.process_line())
-            elif typ == v3dtypes.v3dtypes_pixel_:
-                self._objects.append(self.process_pixel())
-            elif typ == v3dtypes.v3dtypes_triangles:
-                self._objects.append(self.process_triangles())
-            elif typ == v3dtypes.v3dtypes_material_:
+            if typ == v3dtypes.v3dtypes_material_:
                 self._materials.append(self.process_material())
             elif typ == v3dtypes.v3dtypes_centers:
                 self._centers = self.process_centers()
             elif typ == v3dtypes.v3dtypes_header:
                 self.process_header()
+            else:
+                fn = self.get_fn_process_type(typ)
+                if fn is not None:
+                    obj = fn()
+                    self._objects.append(obj)
+                else:
+                    raise RuntimeError('Unknown Object type. Received type {0}'.format(typ))
 
         self._xdrfile.done()
         self._processed = True
 
 
 def main():
-    v3d_obj = V3DReader.from_file_name('../teapot.v3d')
+    v3d_obj = V3DReader.from_file_name('teapot.v3d')
     print(v3d_obj.objects)
     pass
 
