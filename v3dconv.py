@@ -238,6 +238,8 @@ class V3DReader:
         self.processed = False
 
         self._xdrfile = xdrlib.Unpacker(fil.read())
+        self.unpack_double = self._xdrfile.unpack_double
+        self.allow_double_precision = True
 
     def get_objtype(self) -> Optional[int]:
         try:
@@ -247,9 +249,9 @@ class V3DReader:
             return None
 
     def unpack_triple(self) -> TY_TRIPLE:
-        x = self._xdrfile.unpack_double()
-        y = self._xdrfile.unpack_double()
-        z = self._xdrfile.unpack_double()
+        x = self.unpack_double()
+        y = self.unpack_double()
+        z = self.unpack_double()
         return x, y, z
 
     def unpack_rgba_float(self) -> TY_RGBA:
@@ -387,7 +389,7 @@ class V3DReader:
 
     def process_sphere(self) -> V3DSphere:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_double()
+        radius = self.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
@@ -395,44 +397,44 @@ class V3DReader:
 
     def process_half_sphere(self) -> V3DHalfSphere:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_double()
+        radius = self.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        polar = self._xdrfile.unpack_double()
-        azimuth = self._xdrfile.unpack_double()
+        polar = self.unpack_double()
+        azimuth = self.unpack_double()
         return V3DHalfSphere(center, radius, polar, azimuth, material_id, center_id)
 
     def process_cylinder(self) -> V3DCylinder:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_double()
-        height = self._xdrfile.unpack_double()
+        radius = self.unpack_double()
+        height = self.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        polar = self._xdrfile.unpack_double()
-        azimuth = self._xdrfile.unpack_double()
+        polar = self.unpack_double()
+        azimuth = self.unpack_double()
         core_base = self.unpack_bool()
 
         return V3DCylinder(center, radius, height, polar, azimuth, core_base, material_id, center_id)
 
     def process_disk(self) -> V3DDisk:
         center = self.unpack_triple()
-        radius = self._xdrfile.unpack_double()
+        radius = self.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        polar = self._xdrfile.unpack_double()
-        azimuth = self._xdrfile.unpack_double()
+        polar = self.unpack_double()
+        azimuth = self.unpack_double()
 
         return V3DDisk(center, radius, polar, azimuth, material_id, center_id)
 
     def process_tube(self) -> V3DTube:
         points = self.unpack_triple_n(4)
-        width = self._xdrfile.unpack_double()
+        width = self.unpack_double()
 
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
@@ -469,7 +471,7 @@ class V3DReader:
 
     def process_pixel(self) -> V3DPixel:
         point = self.unpack_triple()
-        width = self._xdrfile.unpack_double()
+        width = self.unpack_double()
 
         material_id = self._xdrfile.unpack_uint()
 
@@ -557,7 +559,11 @@ class V3DReader:
 
         self.file_ver = self._xdrfile.unpack_uint()
 
-        while typ := self.get_objtype():
+        self.allow_double_precision = self.unpack_bool()
+        if not self.allow_double_precision:
+            self.unpack_double = self._xdrfile.unpack_float
+
+        while typ := self.get_obj_type():
             if typ == v3dtypes.v3dtypes_bezierPatch:
                 self.objects.append(self.process_bezierpatch())
             elif typ == v3dtypes.v3dtypes_bezierPatchColor:
