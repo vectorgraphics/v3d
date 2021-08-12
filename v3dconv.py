@@ -230,22 +230,51 @@ class V3DPixel(AV3Dobject):
 
 class V3DReader:
     def __init__(self, fil: gzip.GzipFile):
-        self.objects = []
-        self.materials = []
-        self.centers = []
+        self._objects = []
+        self._materials = []
+        self._centers = []
 
-        self.file_ver = None
-        self.processed = False
+        self._file_ver = None
+        self._processed = False
 
         self._xdrfile = xdrlib.Unpacker(fil.read())
         self.unpack_double = self._xdrfile.unpack_double
-        self.allow_double_precision = True
+        self._allow_double_precision = True
 
     @classmethod
     def from_file_name(cls, file_name: str):
         with gzip.open(file_name, 'rb') as fil:
             reader_obj = cls(fil)
         return reader_obj
+
+    @property
+    def processed(self):
+        return self._processed
+
+    @property
+    def objects(self):
+        self.process()
+        return self._objects
+
+    @property
+    def materials(self):
+        self.process()
+        return self._materials
+
+    @property
+    def centers(self):
+        self.process()
+        return self._centers
+
+    @property
+    def file_version(self):
+        self.process()
+        return self._file_ver
+
+    @property
+    def allow_double_precision(self):
+        self.process()
+        return self._allow_double_precision
 
     def get_obj_type(self) -> Optional[int]:
         try:
@@ -557,68 +586,67 @@ class V3DReader:
             return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id, min_val, max_val)
 
     def process(self, force: bool = False):
-        if self.processed and not force:
+        if self._processed and not force:
             return
 
-        if self.processed and force:
+        if self._processed and force:
             self._xdrfile.set_position(0)
 
-        self.file_ver = self._xdrfile.unpack_uint()
+        self._file_ver = self._xdrfile.unpack_uint()
 
-        self.allow_double_precision = self.unpack_bool()
-        if not self.allow_double_precision:
+        self._allow_double_precision = self.unpack_bool()
+        if not self._allow_double_precision:
             self.unpack_double = self._xdrfile.unpack_float
 
         while typ := self.get_obj_type():
             if typ == v3dtypes.v3dtypes_bezierPatch:
-                self.objects.append(self.process_bezierpatch())
+                self._objects.append(self.process_bezierpatch())
             elif typ == v3dtypes.v3dtypes_bezierPatchColor:
-                self.objects.append(self.process_bezierpatch_color())
+                self._objects.append(self.process_bezierpatch_color())
             if typ == v3dtypes.v3dtypes_bezierTriangle:
-                self.objects.append(self.process_beziertriangle())
+                self._objects.append(self.process_beziertriangle())
             elif typ == v3dtypes.v3dtypes_bezierTriangleColor:
-                self.objects.append(self.process_beziertriangle_color())
+                self._objects.append(self.process_beziertriangle_color())
             if typ == v3dtypes.v3dtypes_quad:
-                self.objects.append(self.process_straight_bezierpatch())
+                self._objects.append(self.process_straight_bezierpatch())
             elif typ == v3dtypes.v3dtypes_quadColor:
-                self.objects.append(self.process_straight_bezierpatch_color())
+                self._objects.append(self.process_straight_bezierpatch_color())
             if typ == v3dtypes.v3dtypes_triangle:
-                self.objects.append(self.process_straight_beziertriangle())
+                self._objects.append(self.process_straight_beziertriangle())
             elif typ == v3dtypes.v3dtypes_triangleColor:
-                self.objects.append(self.process_straight_beziertriangle_color())
+                self._objects.append(self.process_straight_beziertriangle_color())
             elif typ == v3dtypes.v3dtypes_sphere:
-                self.objects.append(self.process_sphere())
+                self._objects.append(self.process_sphere())
             elif typ == v3dtypes.v3dtypes_halfSphere:
-                self.objects.append(self.process_half_sphere())
+                self._objects.append(self.process_half_sphere())
             elif typ == v3dtypes.v3dtypes_cylinder:
-                self.objects.append(self.process_cylinder())
+                self._objects.append(self.process_cylinder())
             elif typ == v3dtypes.v3dtypes_disk:
-                self.objects.append(self.process_disk())
+                self._objects.append(self.process_disk())
             elif typ == v3dtypes.v3dtypes_tube:
-                self.objects.append(self.process_tube())
+                self._objects.append(self.process_tube())
             elif typ == v3dtypes.v3dtypes_curve:
-                self.objects.append(self.process_curve())
+                self._objects.append(self.process_curve())
             elif typ == v3dtypes.v3dtypes_line:
-                self.objects.append(self.process_line())
+                self._objects.append(self.process_line())
             elif typ == v3dtypes.v3dtypes_pixel_:
-                self.objects.append(self.process_pixel())
+                self._objects.append(self.process_pixel())
             elif typ == v3dtypes.v3dtypes_triangles:
-                self.objects.append(self.process_triangles())
+                self._objects.append(self.process_triangles())
             elif typ == v3dtypes.v3dtypes_material_:
-                self.materials.append(self.process_material())
+                self._materials.append(self.process_material())
             elif typ == v3dtypes.v3dtypes_centers:
-                self.centers = self.process_centers()
+                self._centers = self.process_centers()
             elif typ == v3dtypes.v3dtypes_header:
                 self.process_header()
 
         self._xdrfile.done()
-        self.processed = True
+        self._processed = True
 
 
 def main():
     v3d_obj = V3DReader.from_file_name('teapot.v3d')
-    v3d_obj.process()
-
+    print(v3d_obj.objects)
     pass
 
 
