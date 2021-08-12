@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import xdrlib
-import io
-from typing import Union, Tuple, Optional, List, Any
+import gzip
+from typing import Union, Tuple, Optional, List
 from enums.v3dtypes import v3dtypes
 
 TY_TRIPLE = Tuple[float, float, float]
@@ -229,7 +229,7 @@ class V3DPixel(AV3Dobject):
 
 
 class V3DReader:
-    def __init__(self, fil: Union[io.FileIO, io.BytesIO, Any]):
+    def __init__(self, fil: gzip.GzipFile):
         self.objects = []
         self.materials = []
         self.centers = []
@@ -241,7 +241,13 @@ class V3DReader:
         self.unpack_double = self._xdrfile.unpack_double
         self.allow_double_precision = True
 
-    def get_objtype(self) -> Optional[int]:
+    @classmethod
+    def from_file_name(cls, file_name: str):
+        with gzip.open(file_name, 'rb') as fil:
+            reader_obj = cls(fil)
+        return reader_obj
+
+    def get_obj_type(self) -> Optional[int]:
         try:
             typ = self._xdrfile.unpack_uint()  # XDR does not support short
             return typ
@@ -610,9 +616,9 @@ class V3DReader:
 
 
 def main():
-    with io.open('teapot.v3d', 'rb') as fil:
-        v3d_obj = V3DReader(fil)
+    v3d_obj = V3DReader.from_file_name('teapot.v3d')
     v3d_obj.process()
+
     pass
 
 
