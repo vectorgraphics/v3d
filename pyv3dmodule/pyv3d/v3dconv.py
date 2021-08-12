@@ -2,8 +2,8 @@
 import xdrlib
 import gzip
 from typing import Union, Tuple, Optional, List, Callable
-from enums.v3dtypes import v3dtypes
-from enums.v3dheadertypes import v3dheadertypes
+from .enums.v3dtypes import v3dtypes
+from .enums.v3dheadertypes import v3dheadertypes
 
 TY_PAIR = Tuple[float, float]
 TY_TRIPLE = Tuple[float, float, float]
