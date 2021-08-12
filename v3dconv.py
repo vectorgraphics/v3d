@@ -535,18 +535,18 @@ class V3DReader:
     def process_triangles(self) -> Union[V3DTriangleGroups, V3DTriangleGroupsColor]:
         is_color = False
 
-        nP = self._xdrfile.unpack_uint()
-        positions = self.unpack_triple_n(nP)
+        num_pos = self._xdrfile.unpack_uint()
+        positions = self.unpack_triple_n(num_pos)
 
-        nN = self._xdrfile.unpack_uint()
-        normals = self.unpack_triple_n(nN)
+        num_normal = self._xdrfile.unpack_uint()
+        normals = self.unpack_triple_n(num_normal)
 
-        nC = self._xdrfile.unpack_uint()
+        num_color = self._xdrfile.unpack_uint()
         colors = None
 
-        if nC > 0:
+        if num_color > 0:
             is_color = True
-            colors = self.unpack_rgba_float_n(nC)
+            colors = self.unpack_rgba_float_n(num_color)
 
         pos_indices = []
         normal_indices = []
@@ -555,25 +555,25 @@ class V3DReader:
         if is_color:
             color_indices = []
 
-        numIdx = self._xdrfile.unpack_uint()
-        for _ in range(numIdx):
-            numTyp = self._xdrfile.unpack_uint()
-            posIdx = self._unpack_int_indices()
-            norIdx = list(posIdx)
-            colIdx = list(posIdx)
+        num_idx = self._xdrfile.unpack_uint()
+        for _ in range(num_idx):
+            num_typ = self._xdrfile.unpack_uint()
+            pos_idx = self._unpack_int_indices()
+            nor_idx = list(pos_idx)
+            col_idx = list(pos_idx)
 
-            if numTyp == 1:
-                norIdx = self._unpack_int_indices()
-            elif numTyp == 2:
-                colIdx = self._unpack_int_indices()
-            elif numTyp == 3:
-                norIdx = self._unpack_int_indices()
-                colIdx = self._unpack_int_indices()
+            if num_typ == 1:
+                nor_idx = self._unpack_int_indices()
+            elif num_typ == 2:
+                col_idx = self._unpack_int_indices()
+            elif num_typ == 3:
+                nor_idx = self._unpack_int_indices()
+                col_idx = self._unpack_int_indices()
 
-            pos_indices.append(tuple(posIdx))
-            normal_indices.append(tuple(norIdx))
+            pos_indices.append(tuple(pos_idx))
+            normal_indices.append(tuple(nor_idx))
             if is_color:
-                color_indices.append(tuple(colIdx))
+                color_indices.append(tuple(col_idx))
 
         material_id = self._xdrfile.unpack_uint()
         min_val = self.unpack_triple()
@@ -583,7 +583,8 @@ class V3DReader:
             return V3DTriangleGroupsColor(positions, normals, colors, pos_indices,
                                           normal_indices, color_indices, material_id, min_val, max_val)
         else:
-            return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id, min_val, max_val)
+            return V3DTriangleGroups(positions, normals, pos_indices,
+                                     normal_indices, material_id, min_val, max_val)
 
     def process(self, force: bool = False):
         if self._processed and not force:
