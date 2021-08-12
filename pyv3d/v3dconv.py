@@ -646,7 +646,7 @@ class V3DReader:
 
 
 def main():
-    v3d_obj = V3DReader.from_file_name('teapot.v3d')
+    v3d_obj = V3DReader.from_file_name('../teapot.v3d')
     print(v3d_obj.objects)
     pass
 
