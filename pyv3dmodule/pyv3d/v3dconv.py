@@ -178,11 +178,8 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
         assert len(base_ctlpts) == 16
-        return V3DBezierPatch(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+        return V3DBezierPatch(tuple(base_ctlpts), material_id, center_id)
 
     def process_bezierpatch_color(self) -> V3DBezierPatchColor:
         base_ctlpts = self.unpack_triple_n(16)
@@ -192,10 +189,8 @@ class V3DReader:
 
         colors = self.unpack_rgba_float_n(4)
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
         assert len(base_ctlpts) == 16
-        return V3DBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+        return V3DBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id)
 
     def process_beziertriangle(self) -> V3DBezierTriangle:
         base_ctlpts = self.unpack_triple_n(10)
@@ -203,11 +198,8 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
         assert len(base_ctlpts) == 10
-        return V3DBezierTriangle(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+        return V3DBezierTriangle(tuple(base_ctlpts), material_id, center_id)
 
     def process_beziertriangle_color(self) -> V3DBezierTriangleColor:
         base_ctlpts = self.unpack_triple_n(10)
@@ -217,10 +209,8 @@ class V3DReader:
 
         colors = self.unpack_rgba_float_n(3)
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
         assert len(base_ctlpts) == 10
-        return V3DBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+        return V3DBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id)
 
     def process_straight_bezierpatch(self) -> V3DStraightBezierPatch:
         base_ctlpts = self.unpack_triple_n(4)
@@ -228,11 +218,8 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
         assert len(base_ctlpts) == 4
-        return V3DStraightBezierPatch(tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+        return V3DStraightBezierPatch(tuple(base_ctlpts), material_id, center_id)
 
     def process_straight_bezierpatch_color(self) -> V3DStraightBezierPatchColor:
         base_ctlpts = self.unpack_triple_n(4)
@@ -242,10 +229,8 @@ class V3DReader:
 
         colors = self.unpack_rgba_float_n(4)
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
         assert len(base_ctlpts) == 4
-        return V3DStraightBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+        return V3DStraightBezierPatchColor(tuple(base_ctlpts), tuple(colors), material_id, center_id)
 
     def process_straight_beziertriangle(self) -> V3DStraightBezierTriangle:
         base_ctlpts = self.unpack_triple_n(3)
@@ -253,12 +238,8 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
         assert len(base_ctlpts) == 3
-        return V3DStraightBezierTriangle(
-            tuple(base_ctlpts), material_id, center_id, min_val, max_val)
+        return V3DStraightBezierTriangle(tuple(base_ctlpts), material_id, center_id)
 
     def process_straight_beziertriangle_color(self) -> V3DStraightBezierTriangleColor:
         base_ctlpts = self.unpack_triple_n(3)
@@ -268,11 +249,8 @@ class V3DReader:
 
         colors = self.unpack_rgba_float_n(3)
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
         assert len(base_ctlpts) == 3
-        return V3DStraightBezierTriangleColor(
-            tuple(base_ctlpts), tuple(colors), material_id, center_id, min_val, max_val)
+        return V3DStraightBezierTriangleColor(tuple(base_ctlpts), tuple(colors), material_id, center_id)
 
     def process_sphere(self) -> V3DSphere:
         center = self.unpack_triple()
@@ -326,12 +304,9 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
         core_base = self.unpack_bool()
 
-        return V3DTube(points[0], points[1], points[2], points[3],
-                       width, core_base, material_id, center_id, min_val, max_val)
+        return V3DTube(points[0], points[1], points[2], points[3], width, core_base, material_id, center_id)
 
     def process_curve(self) -> V3DCurve:
         points = self.unpack_triple_n(4)
@@ -339,11 +314,7 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
-        return V3DCurve(points[0], points[1], points[2], points[3],
-                        material_id, center_id, min_val, max_val)
+        return V3DCurve(points[0], points[1], points[2], points[3], material_id, center_id)
 
     def process_line(self) -> V3DLine:
         points = self.unpack_triple_n(2)
@@ -351,10 +322,7 @@ class V3DReader:
         center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
-        return V3DLine(points[0], points[1], material_id, center_id, min_val, max_val)
+        return V3DLine(points[0], points[1], material_id, center_id)
 
     def process_pixel(self) -> V3DPixel:
         point = self.unpack_triple()
@@ -362,10 +330,7 @@ class V3DReader:
 
         material_id = self._xdrfile.unpack_uint()
 
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
-
-        return V3DPixel(point, width, material_id, None, min_val, max_val)
+        return V3DPixel(point, width, material_id, None)
 
     def process_material(self) -> V3DMaterial:
         diffuse = self.unpack_rgba_float()
@@ -428,15 +393,12 @@ class V3DReader:
                 color_indices.append(tuple(col_idx))
 
         material_id = self._xdrfile.unpack_uint()
-        min_val = self.unpack_triple()
-        max_val = self.unpack_triple()
 
         if is_color:
-            return V3DTriangleGroupsColor(positions, normals, colors, pos_indices,
-                                          normal_indices, color_indices, material_id, min_val, max_val)
+            return V3DTriangleGroupsColor(positions, normals, colors, pos_indices, normal_indices, color_indices,
+                                          material_id)
         else:
-            return V3DTriangleGroups(positions, normals, pos_indices,
-                                     normal_indices, material_id, min_val, max_val)
+            return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id)
 
     def get_fn_process_type(self, typ: int) -> Optional[Callable[[], AV3Dobject]]:
         return self._object_process_fns.get(typ, None)

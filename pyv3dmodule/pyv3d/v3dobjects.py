@@ -5,12 +5,9 @@ from typing import Optional
 
 
 class AV3Dobject:
-    def __init__(self, material_id: Optional[int] = None, center_index: Optional[int] = None,
-                 min_val: Optional[TY_TRIPLE] = None, max_val: Optional[TY_TRIPLE] = None):
+    def __init__(self, material_id: Optional[int] = None, center_index: Optional[int] = None):
         self.material_id = material_id
         self.center_index = center_index
-        self.min = min_val
-        self.max = max_val
 
 
 class V3DMaterial(AV3Dobject):
@@ -60,79 +57,61 @@ class V3DHeaderInformation:
 
 
 class V3DBezierPatch(AV3Dobject):
-    def __init__(
-            self, ctrl_points: TY_BEZIER_PATCH, material_id: int = None,
-            center_index: int = None, min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_BEZIER_PATCH, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.control_pts = ctrl_points
 
 
 class V3DBezierPatchColor(V3DBezierPatch):
-    def __init__(
-            self, ctrl_points: TY_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR,
-            material_id: int = None, center_index: int = None,
-            min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(ctrl_points, material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR, material_id: int = None,
+                 center_index: int = None):
+        super().__init__(ctrl_points, material_id, center_index)
         self.colors = colors
 
 
 class V3DBezierTriangle(AV3Dobject):
-    def __init__(
-            self, ctrl_points: TY_BEZIER_TRIANGLE, material_id: int = None,
-            center_index: int = None, min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_BEZIER_TRIANGLE, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.control_pts = ctrl_points
 
 
 class V3DBezierTriangleColor(V3DBezierPatch):
-    def __init__(
-            self, ctrl_points: TY_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
-            material_id: int = None, center_index: int = None,
-            min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(ctrl_points, material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR, material_id: int = None,
+                 center_index: int = None):
+        super().__init__(ctrl_points, material_id, center_index)
         self.colors = colors
 
 
 class V3DStraightBezierPatch(AV3Dobject):
-    def __init__(
-            self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, material_id: int = None,
-            center_index: int = None, min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.control_pts = ctrl_points
 
 
 class V3DStraightBezierPatchColor(V3DStraightBezierPatch):
-    def __init__(
-            self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR,
-            material_id: int = None, center_index: int = None,
-            min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(ctrl_points, material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_STRAIGHT_BEZIER_PATCH, colors: TY_BEZIER_PATCH_COLOR, material_id: int = None,
+                 center_index: int = None):
+        super().__init__(ctrl_points, material_id, center_index)
         self.colors = colors
 
 
 class V3DStraightBezierTriangle(AV3Dobject):
-    def __init__(
-            self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, material_id: int = None,
-            center_index: int = None, min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.control_pts = ctrl_points
 
 
 class V3DStraightBezierTriangleColor(V3DBezierPatch):
-    def __init__(
-            self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
-            material_id: int = None, center_index: int = None,
-            min_val: TY_TRIPLE = None, max_val: TY_TRIPLE = None):
-        super().__init__(ctrl_points, material_id, center_index, min_val, max_val)
+    def __init__(self, ctrl_points: TY_STRAIGHT_BEZIER_TRIANGLE, colors: TY_BEZIER_TRIANGLE_COLOR,
+                 material_id: int = None, center_index: int = None):
+        super().__init__(ctrl_points, material_id, center_index)
         self.colors = colors
 
 
 class V3DTriangleGroups(AV3Dobject):
-    def __init__(
-            self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE],
-            position_indices: TY_INDICES, normals_indices: TY_INDICES, material_id: int = None,
-            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(material_id, None, min_value, max_value)
+    def __init__(self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], position_indices: TY_INDICES,
+                 normals_indices: TY_INDICES, material_id: int = None):
+        super().__init__(material_id, None)
         self.positions = positions
         self.normals = normals
         self.position_indices = position_indices
@@ -141,11 +120,10 @@ class V3DTriangleGroups(AV3Dobject):
 
 
 class V3DTriangleGroupsColor(V3DTriangleGroups):
-    def __init__(
-            self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], colors: List[TY_RGBA],
-            position_indices: TY_INDICES, normals_indices: TY_INDICES, color_indices: TY_INDICES,
-            material_id: int = None, min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(positions, normals, position_indices, normals_indices, material_id, min_value, max_value)
+    def __init__(self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], colors: List[TY_RGBA],
+                 position_indices: TY_INDICES, normals_indices: TY_INDICES, color_indices: TY_INDICES,
+                 material_id: int = None):
+        super().__init__(positions, normals, position_indices, normals_indices, material_id)
         self.colors = colors
         self.color_indices = color_indices
         assert len(color_indices) == len(position_indices)
@@ -154,7 +132,7 @@ class V3DTriangleGroupsColor(V3DTriangleGroups):
 class V3DSphere(AV3Dobject):
     def __init__(
             self, center: TY_TRIPLE, radius: float, material_id: int = None, center_index: int = None):
-        super().__init__(material_id, center_index, None, None)
+        super().__init__(material_id, center_index)
         self.center = center
         self.radius = radius
 
@@ -172,7 +150,7 @@ class V3DCylinder(AV3Dobject):
     def __init__(
             self, center: TY_TRIPLE, radius: float, height: float, polar: float, azimuth: float, core: bool,
             material_id: int = None, center_index: int = None):
-        super().__init__(material_id, center_index, None, None)
+        super().__init__(material_id, center_index)
         self.center = center
         self.radius = radius
         self.height = height
@@ -193,22 +171,18 @@ class V3DDisk(AV3Dobject):
 
 
 class V3DTube(AV3Dobject):
-    def __init__(
-            self, c0: TY_TRIPLE, c1: TY_TRIPLE, c2: TY_TRIPLE, c3: TY_TRIPLE, width: float, core: bool,
-            material_id: int = None, center_index: int = None,
-            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_value, max_value)
+    def __init__(self, c0: TY_TRIPLE, c1: TY_TRIPLE, c2: TY_TRIPLE, c3: TY_TRIPLE, width: float, core: bool,
+                 material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.path = (c0, c1, c2, c3)
         self.width = width
         self.core = core
 
 
 class V3DCurve(AV3Dobject):
-    def __init__(
-            self, z0: TY_TRIPLE, c0: TY_TRIPLE, c1: TY_TRIPLE, z1: TY_TRIPLE,
-            material_id: int = None, center_index: int = None,
-            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_value, max_value)
+    def __init__(self, z0: TY_TRIPLE, c0: TY_TRIPLE, c1: TY_TRIPLE, z1: TY_TRIPLE, material_id: int = None,
+                 center_index: int = None):
+        super().__init__(material_id, center_index)
         self.z0 = z0
         self.c0 = c0
         self.c1 = c1
@@ -217,20 +191,16 @@ class V3DCurve(AV3Dobject):
 
 class V3DLine(AV3Dobject):
     def __init__(
-            self, z0: TY_TRIPLE, z1: TY_TRIPLE,
-            material_id: int = None, center_index: int = None,
-            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_value, max_value)
+            self, z0: TY_TRIPLE, z1: TY_TRIPLE, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.z0 = z0
         self.z1 = z1
 
 
 class V3DPixel(AV3Dobject):
     def __init__(
-            self, point: TY_TRIPLE, width: float,
-            material_id: int = None, center_index: int = None,
-            min_value: TY_TRIPLE = None, max_value: TY_TRIPLE = None):
-        super().__init__(material_id, center_index, min_value, max_value)
+            self, point: TY_TRIPLE, width: float, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.point = point
         self.width = width
 
