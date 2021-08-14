@@ -9,8 +9,9 @@ alongside bezier patches and triangles.
 2. Reference Python library for reading in V3D (in `pyv3d` directory)
 
 ## Authors
-The authors of V3D are Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com> and
-John C. Bowman <bowman@ualberta.ca>
+The authors of V3D are John C. Bowman <bowman@ualberta.ca> and
+Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com>
+
 
 ## License
 See LICENSE file.

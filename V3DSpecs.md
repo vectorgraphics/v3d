@@ -4,11 +4,11 @@
 
 Here, for each object in V3D, we use the convention `TYPE` or `TYPExN` Object. `TYPExN` means Object of type `TYPE` repeated `N` times. If `N` is zero, then the entry `TYPEx0` does not appear in the file and can be ignored. `TYPE` can be:
 
-1. `UINT`: Unsigned 32-bit integer
-2. `BOOL`: Unsigned 32-bit integer, which denotes False if value is `0`, and True otherwise.
-3. `REAL`: Either double or single floating point number, depending on the double precision flag set as described in the subsequent section.
-4. `FLOAT`: Single precision 32-bit IEEE 754 Floating point
-5. `TRIPLE`: Triple is `REALx3`
+1. `UINT`: Unsigned 32-bit integer;
+2. `BOOL`: Unsigned 32-bit integer, which denotes False if value is `0`, and True otherwise;
+3. `REAL`: Either double or single floating point number, depending on the double precision flag set as described in the subsequent section;
+4. `FLOAT`: Single precision 32-bit IEEE 754 Floating point;
+5. `TRIPLE`: Triple is `REALx3`;
 6. `RGBA`: `FLOATx4`, where each element corresponds, in sequence to red, green, blue and alpha values between `0.0` to `1.0`.
 
 
@@ -32,20 +32,20 @@ V3D Types and their corresponding type numbers are available on the `asymptote` 
 
 In this section, the specification of the content described does not include the type number, that is, it is assumed the type number is already processed and known.
 
-### Bezier Patche
+### Bezier Patch
 
 Each [Bezier Patch](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
 
 1. `TRIPLEx16`: Control points of Bezier patches, where each corresponds to the 16 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `>0`. If Index is zero, denotes there is no center point associated with this object.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 
 ### Bezier Triangle
 
 Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
 
-1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 9 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `>0`. If Index is zero, denotes there is no center point associated with this object.
+1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 
 ### Bezier Patch (Color)
@@ -53,7 +53,7 @@ Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) conta
 Each Bezier Patch with per-vertex color contains
 
 1. `TRIPLEx16`: Control points of Bezier patches, where each corresponds to the 16 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `>0`. If Index is zero, denotes there is no center point associated with this object.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 4. `RGBAx4`: The colors of each vertex, corresponding to the four corners of the Bezier patch.
 
@@ -63,7 +63,7 @@ Each Bezier Patch with per-vertex color contains
 Each Bezier Triangle with per-vertex color contains
 
 1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `>0`. If Index is zero, denotes there is no center point associated with this object.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 4. `RGBAx3`: The colors of each vertex, corresponding to the four corners of the Bezier triangle.
 
