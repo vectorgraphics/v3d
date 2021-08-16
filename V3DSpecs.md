@@ -131,16 +131,20 @@ Each triangle group contains:
 
 Then, the triangle group contains `NI` number of the following:
 
-1. `UINT`: Type of indices expected.
-2. `UINTx3`: Index of the position. These three unsigned integers `i,j,k` correspond to the index of the positions array as `Positions[i]`, `Positions[j]` and `Positions[k]` forming the face of the triangle.
+> 1. `UINTx3`: Index of the position. These three unsigned integers `i,j,k` correspond to the index of the positions array as `Positions[i]`, `Positions[j]` and `Positions[k]` forming the face of the triangle.
+> 2. `BOOL` Whether or not normal indices is present. Call this `keepNI`
+> 
+> if `keepNI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the normal of each vertex corresponds to.
+> Otherwise, the normal index is the same as the position index.
+> 
+> #### The following section only applies if `NC>0`:
+> `BOOL` Whether or not color indices is present. Call this `keepCI`
+> if `keepCI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the color of each vertex corresponds to.
+> Otherwise, the color index is the same as the position index.
 
-Then, if the index type is `1` or `3`, there is a `UINTx3` normal index denoting the index of normals array such that the normal of each vertex corresponds to. Otherwise, if the index type is `0` or `2`, then the normal index is the same as the position index.
+#### The following section applies to all triangle groups regardless of `NC` and appears only once after all indices have been processed
 
-Likewise, if the index type is `2` or `3`, there is a `UINTx3` normal index denoting the index of colors array such that the color of each vertex corresponds to. Otherwise, if the index type is `0` or `1`, then the color index is the same as the position index.
-
-Note that if `NC==0`, then the index type is always `0` or `1`.
-
-Then, the object contains `UINT` Material Index like in the previous objects.
+Then, the object contains `UINT` Center index and `UINT` Material Index like in the previous objects.
 
 ### Sphere
 
