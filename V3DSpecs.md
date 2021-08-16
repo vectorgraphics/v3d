@@ -32,6 +32,19 @@ V3D Types and their corresponding type numbers are available on the `asymptote` 
 
 In this section, the specification of the content described does not include the type number, that is, it is assumed the type number is already processed and known.
 
+### Material
+
+V3D Materials are specified by metallic-roughness physical-based rendering format, though the roughness is specified by shininess, which is `1-roughness`, specified by
+
+1. `FLOATx4` Base color of the material.
+2. `FLOATx4` Emissive color of the material.
+3. `FLOATx4` Specular color. While this number is not used in true PBR, this color is multiplied to the final reflectance (in case of nonmetals).
+4. `FLOATx4` Parameters, in `[shininess, metallic, F0, X]` where X is unused. Here, F0 is "Fresnel-0" indicating how much a dielectric surface should reflect the incoming lights when viewed from a perfectly perpendicular angle to the surface (at 0 degrees), which defaults to `0.04`
+
+
+All `FLOATx4` colors are stored in RGBA format between `0.0` and `1.0`.
+
+
 ### Bezier Patch
 
 Each [Bezier Patch](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
@@ -63,6 +76,40 @@ Each Bezier Patch with per-vertex color contains
 Each Bezier Triangle with per-vertex color contains
 
 1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+4. `RGBAx3`: The colors of each vertex, corresponding to the four corners of the Bezier triangle.
+
+
+### Straight Quad
+
+1. `TRIPLEx4`: Corners of the specified rectangle
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+
+### Straight Triangle
+
+Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
+
+1. `TRIPLEx3`: Corner of the specified triangle
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+
+### Straight Quad (with vertex colors)
+
+Each Bezier Patch with per-vertex color contains
+
+1. `TRIPLEx4`: Corners of the specified rectangle
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+4. `RGBAx4`: The colors of each vertex, corresponding to the four corners of the Bezier patch.
+
+
+### Straight Triangle (with vertex colors)
+
+Each Bezier Triangle with per-vertex color contains
+
+1. `TRIPLEx3`: Corner of the specified triangle
 2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 4. `RGBAx3`: The colors of each vertex, corresponding to the four corners of the Bezier triangle.
