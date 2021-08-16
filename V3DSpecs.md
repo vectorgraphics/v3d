@@ -96,3 +96,91 @@ Likewise, if the index type is `2` or `3`, there is a `UINTx3` normal index deno
 Note that if `NC==0`, then the index type is always `0` or `1`.
 
 Then, the object contains `UINT` Material Index like in the previous objects.
+
+### Sphere
+
+A Sphere is specified by
+
+1. `TRIPLE`: Center of the sphere.
+2. `REAL`: Radius of the sphere
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+
+
+### Hemisphere
+
+A Hemisphere is the half sphere specified by a base sphere and an angle in polar and azimuth angles
+(FIXME: in radians?) specifying the normal vector of the plane which partitions the sphere, with
+hemisphere being the side of the sphere normal vector faces.
+
+1. `TRIPLE`: Center of the sphere.
+2. `REAL`: Radius of the sphere
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+5. `REAL` Polar angle
+6. `REAL` Azimuth angle
+
+### Disks
+
+A Disk is a planar filled circle specified by the center point, radius and angle of the surface normal specified by polar and azimuth angles, in the order of
+
+1. `TRIPLE`: Center of the disk.
+2. `REAL`: Radius of the disk
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+5. `REAL` Polar angle
+6. `REAL` Azimuth angle
+
+### Cylinder
+
+A Cylinder is specific by the center and radius of the bottom disk, alongside the height of the
+cylinder indicating how long the cylinder is extruded from the base disk.
+
+1. `TRIPLE`: Center of the disk.
+2. `REAL`: Radius of the disk
+3. `REAL`: Height of the cylinder
+4. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+5. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+6. `REAL` Polar angle
+7. `REAL` Azimuth angle.
+
+### Tubes
+
+A Tube is a deformed cylinder, without the end faces that follows a bezier curve as its center. It is specified by
+
+1. `TRIPLEx4`: Four Bezier control points indicating the center "core" of the tube.
+2. `REAL`: Width of the tube
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+5. `BOOL`: Whether or not the center curve should be drawn. This is called the "core" flag in Asymptote.
+
+### Bezier Curve
+
+A Bezier curve is a curve specified by four control points $p, c_0, c_1, q \in \mathbb{R}^3$, producing a curve (which here, is described as a function $C: [0,1] \to \mathbb{R}^3$) by
+
+$$
+C: [0,1] \to \mathbb{R}^3, \quad t \mapsto (1-t)^3p + 3t(1-t^2)c_0 + 3t^2(1-t)c_1 + t^3q.
+$$
+
+Here, the curve is specified by four points by
+
+1. `TRIPLEx4` The control points p, c_0, c_1 and q respectively.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+
+### Line
+
+A line is specified by
+
+1. `TRIPLEx2` The points p, q respectively where the line is specfied as the line from p to q.
+2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+
+### Pixel
+
+A "Pixel" here is a single point in a 3D space and a width quantity to specify the drawing size.
+In Asymptote, a "pixel" is drawn as a sphere with the radius as width.
+
+1. `TRIPLE`: The point specifying the pixel
+2. `REAL`: The drawing width of the pixel
+3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
