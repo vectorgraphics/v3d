@@ -36,14 +36,12 @@ In this section, the specification of the content described does not include the
 
 V3D Materials are specified by metallic-roughness physical-based rendering format, though the roughness is specified by shininess, which is `1-roughness`, specified by
 
-1. `FLOATx4` Base color of the material.
-2. `FLOATx4` Emissive color of the material.
-3. `FLOATx4` Specular color. While this number is not used in true PBR, this color is multiplied to the final reflectance (in case of nonmetals).
+1. `RGBA` Base color of the material.
+2. `RGBA` Emissive color of the material.
+3. `RGBA` Specular color. While this number is not used in true PBR, this color is multiplied to the final reflectance (in case of nonmetals).
 4. `FLOATx4` Parameters, in `[shininess, metallic, F0, X]` where X is unused. Here, F0 is "Fresnel-0" indicating how much a dielectric surface should reflect the incoming lights when viewed from a perfectly perpendicular angle to the surface (at 0 degrees), which defaults to `0.04`
 
-
 All `FLOATx4` colors are stored in RGBA format between `0.0` and `1.0`.
-
 
 ### Bezier Patch
 
