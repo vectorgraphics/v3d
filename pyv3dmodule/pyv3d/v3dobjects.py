@@ -110,8 +110,8 @@ class V3DStraightBezierTriangleColor(V3DBezierPatch):
 
 class V3DTriangleGroups(AV3Dobject):
     def __init__(self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], position_indices: TY_INDICES,
-                 normals_indices: TY_INDICES, material_id: int = None):
-        super().__init__(material_id, None)
+                 normals_indices: TY_INDICES, material_id: int = None, center_index: int = None):
+        super().__init__(material_id, center_index)
         self.positions = positions
         self.normals = normals
         self.position_indices = position_indices
@@ -122,8 +122,8 @@ class V3DTriangleGroups(AV3Dobject):
 class V3DTriangleGroupsColor(V3DTriangleGroups):
     def __init__(self, positions: List[TY_TRIPLE], normals: List[TY_TRIPLE], colors: List[TY_RGBA],
                  position_indices: TY_INDICES, normals_indices: TY_INDICES, color_indices: TY_INDICES,
-                 material_id: int = None):
-        super().__init__(positions, normals, position_indices, normals_indices, material_id)
+                 material_id: int = None, center_index: int = None):
+        super().__init__(positions, normals, position_indices, normals_indices, material_id, center_index)
         self.colors = colors
         self.color_indices = color_indices
         assert len(color_indices) == len(position_indices)

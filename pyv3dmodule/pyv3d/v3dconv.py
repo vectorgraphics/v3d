@@ -374,31 +374,28 @@ class V3DReader:
 
         num_idx = self._xdrfile.unpack_uint()
         for _ in range(num_idx):
-            num_typ = self._xdrfile.unpack_uint()
             pos_idx = self._unpack_int_indices()
-            nor_idx = list(pos_idx)
-            col_idx = list(pos_idx)
+            keep_ni = self.unpack_bool()
+            nor_idx = self._unpack_int_indices() if keep_ni else list(pos_idx)
 
-            if num_typ == 1:
-                nor_idx = self._unpack_int_indices()
-            elif num_typ == 2:
-                col_idx = self._unpack_int_indices()
-            elif num_typ == 3:
-                nor_idx = self._unpack_int_indices()
-                col_idx = self._unpack_int_indices()
+            col_idx = None
+            if is_color:
+                keep_ci = self.unpack_bool()
+                col_idx = self._unpack_int_indices() if keep_ci else list(pos_idx)
 
             pos_indices.append(tuple(pos_idx))
             normal_indices.append(tuple(nor_idx))
             if is_color:
                 color_indices.append(tuple(col_idx))
 
+        center_id = self._xdrfile.unpack_uint()
         material_id = self._xdrfile.unpack_uint()
 
         if is_color:
             return V3DTriangleGroupsColor(positions, normals, colors, pos_indices, normal_indices, color_indices,
-                                          material_id)
+                                          material_id, center_id)
         else:
-            return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id)
+            return V3DTriangleGroups(positions, normals, pos_indices, normal_indices, material_id, center_id)
 
     def get_fn_process_type(self, typ: int) -> Optional[Callable[[], AV3Dobject]]:
         return self._object_process_fns.get(typ, None)
