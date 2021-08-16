@@ -57,15 +57,26 @@ All `FLOATx4` colors are stored in RGBA format between `0.0` and `1.0`.
 
 ### Bezier Patch
 
-Each [Bezier Patch](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
+Each [Bezier Patch](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) is a set of 16 control points $p_{i,j} \in \mathbb{R}^3$ where $i,j\in 0,1,2,3$ producing a surface $\Phi$ parameterized by $u,v \in [0,1]$ as a function
+
+$$
+\Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 k_i(u) \sum_{i=0}^3 k_j(v)p_{i,j}
+$$
+
+where $k_n(x)$ are the factor of the cubic binomial expansion of the nTh power of $x$, that is
+$$
+  k_0(x) = x^3, \; k_1(x)=3x^2(1-x), \; k_2(x)=3x(1-x)^2, \; k_3(x)=(1-x)^3.
+$$
 
 1. `TRIPLEx16`: Control points of Bezier patches, where each corresponds to the 16 Bezier control points.
 2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
 3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 
+Each control point `Points[n]` in `TRIPLE Points[16]` are mapped to $p_{i,j}$ by `i=n//4` and `j=n%4`.
+
 ### Bezier Triangle
 
-Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
+Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_triangle]) contains
 
 1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
 2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
@@ -145,10 +156,10 @@ Then, the triangle group contains `NI` number of the following:
 
 > 1. `UINTx3`: Index of the position. These three unsigned integers `i,j,k` correspond to the index of the positions array as `Positions[i]`, `Positions[j]` and `Positions[k]` forming the face of the triangle.
 > 2. `BOOL` Whether or not normal indices is present. Call this `keepNI`
-> 
+>
 > if `keepNI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the normal of each vertex corresponds to.
 > Otherwise, the normal index is the same as the position index.
-> 
+>
 > #### The following section only applies if `NC>0`:
 > `BOOL` Whether or not color indices is present. Call this `keepCI`
 > if `keepCI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the color of each vertex corresponds to.
@@ -164,7 +175,7 @@ A Sphere is specified by
 
 1. `TRIPLE`: Center of the sphere.
 2. `REAL`: Radius of the sphere
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. 
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
    If Index is zero, denotes there is no center point associated with this object.
 4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 
@@ -189,7 +200,7 @@ A Disk is a planar filled circle specified by the center point, radius and angle
 
 1. `TRIPLE`: Center of the disk.
 2. `REAL`: Radius of the disk
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. 
+3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
    If Index is zero, denotes there is no center point associated with this object.
 4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
 5. `REAL` Polar angle
