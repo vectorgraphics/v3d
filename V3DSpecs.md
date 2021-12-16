@@ -2,172 +2,172 @@
 
 ## Conventions
 
-Here, for each object in V3D, we use the convention `TYPE` or `TYPExN` Object. `TYPExN` means Object of type `TYPE` repeated `N` times. If `N` is zero, then the entry `TYPEx0` does not appear in the file and can be ignored. `TYPE` can be:
+`TYPExN` means an object of type `TYPE` repeated `N` times, where `TYPE` can be:
 
 1. `UINT`: Unsigned 32-bit integer;
-2. `BOOL`: Unsigned 32-bit integer, which denotes False if value is `0`, and True otherwise;
-3. `REAL`: Either double or single floating point number, depending on the double precision flag set as described in the subsequent section;
-4. `FLOAT`: Single precision 32-bit IEEE 754 Floating point;
-5. `TRIPLE`: Triple is `REALx3`;
-6. `RGBA`: `FLOATx4`, where each element corresponds, in sequence to red, green, blue and alpha values between `0.0` to `1.0`.
+2. `BOOL`: Unsigned 32-bit integer, denoting False if the value is `0` and True otherwise;
+3. `REAL`: A double or single floating point value, depending on the double precision flag, as described in the next section;
+4. `FLOAT`: A single precision 32-bit IEEE 754 Floating point value;
+5. `TRIPLE`: An alias for `REALx3`;
+6. `RGBA`: `An alias for FLOATx4`, where the elements respectively correspond to the red, green, blue, and alpha channels between `0.0` to `1.0`;
+7. `WORD`: A 4-byte word.
 
+## Basic information
 
-## Basic Information
+V3D files are gzipped XDR Files. The uncompressed data stream of a V3D file must begin with the following entries, in order:
 
-V3D Files are gzipped XDR Files. Here, "Data" means the uncompressed data stream of the v3d file.
+1. `UINT`: Version number, indicating the version of V3D;
+2. `BOOL`: Double Precision flag. If this flag is set to True (False), all `TRIPLE` and `REAL` values are treated as double (single) precision IEEE 754 floating point values.
 
-All V3D File Data must start with the following in order:
+After that, a V3D File contains an arbitrary sequence of objects in the format:
 
-1. `UINT` Version number, which indicates the version of V3D.
-2. `BOOL` Double Precision flag. If this flag is set to true, all `TRIPLE` and `REAL` is treated as double precision IEEE 754 floating point, otherwise single precision.
-
-Then, after that, V3D File contains an arbitrary number of objects in sequence in the format of
-
-1. `UINT` Type Number, which depends on the object type
+1. `UINT`: Type number of the object;
 2. Content of the object, depending on the type.
 
-V3D Types and their corresponding type numbers are available on the `asymptote` repo at <https://github.com/vectorgraphics/asymptote>
+See [V3D types](https://raw.githubusercontent.com/vectorgraphics/asymptote/HEAD/v3dtypes.csv) for the list of V3D objects and their corresponding type numbers.
 
-## V3D Header
+The `center index` is used for implementing billboard labels that always face the viewer. If the index is positive, it points into an array of center positions; if it is zero, there is no associated center point.
 
-A V3D Header is a special type of object.
-The header starts with a `UINT` number indicating how many header entires are there, followed by that number of header entry.
+The `material index` points into an array `Material` of materials.
 
-Each header entry starts with a `UINT` Header key value, then a `UINT` length of the content in the number of 4-bytes blocks.
-For example, a header with a single double-precision number would have the length as `2`.
-The content of the header varies by the key.
+## V3D header
 
-A more detailed description of header keys and their values is available in the `asymptote` repository.
+A V3D Header is a special type of object that starts with a `UINT` number indicating the number of header entries, followed by a sequence of header entries.
 
+Each header entry consists of
+1. `UINT` Header key;
+2. `UINT` length of the content measured in units of 4-byte words. Call this length `n`. For example, `n=2` for a header with one double-precision number.
+3. `WORDxn`. The header content of length `n` words of types dependent on the header key.
 
-## V3D Objects
+See [V3D header types](https://raw.githubusercontent.com/vectorgraphics/asymptote/HEAD/v3dheadertypes.csv) for the list of V3D headers and their corresponding keys.
 
-In this section, the specification of the content described does not include the type number, that is, it is assumed the type number is already processed and known.
+A description of the headers is available at (https://raw.githubusercontent.com/vectorgraphics/asymptote/HEAD/webgl/gl.js)
+
+## V3D objects
+
+The content following the type number is described for each of the following types.
 
 ### Material
 
-V3D Materials are specified by metallic-roughness physical-based rendering format, though the roughness is specified by shininess, which is `1-roughness`, specified by
+V3D materials are specified by their metallic-roughness physical-based rendering properties, where `shininess=1-roughness`:
 
-1. `RGBA` Base color of the material.
+1. `RGBA` Diffuse (base) color of the material.
 2. `RGBA` Emissive color of the material.
-3. `RGBA` Specular color. While this number is not used in true PBR, this color is multiplied to the final reflectance (in case of nonmetals).
-4. `FLOATx4` Parameters, in `[shininess, metallic, F0, X]` where X is unused. Here, F0 is "Fresnel-0" indicating how much a dielectric surface should reflect the incoming lights when viewed from a perfectly perpendicular angle to the surface (at 0 degrees), which defaults to `0.04`
+3. `RGBA` Specular color (used to weight the reflectance of nonmetals).
+4. `FLOATx3` Parameters `shininess, metallic, fresnel0`. Here, fresnel0 measures how much a dielectric surface reflects incoming light when viewed perpendicular to the surface.
 
-All `FLOATx4` colors are stored in RGBA format between `0.0` and `1.0`.
+### Bezier patch
 
-### Bezier Patch
-
-Each [Bezier Patch](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) is a set of 16 control points $p_{i,j} \in \mathbb{R}^3$ where $i,j\in 0,1,2,3$ producing a surface $\Phi$ parameterized by $u,v \in [0,1]$ as a function
+Each [Bezier Patch](https://en.wikipedia.org/wiki/Bézier_surface) is a set of 16 control points $P_{i,j} \in \mathbb{R}^3$ where $i,j\in \{0,1,2,3\}$, producing a surface $\Phi$ parameterized by $u,v \in [0,1]$ as a function
 
 $$
-\Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 k_i(u) \sum_{i=0}^3 k_j(v)p_{i,j}
+\Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 B_i(u) \sum_{i=0}^3 B_j(v)P_{i,j}
 $$
 
-where $k_n(x)$ are the factor of the cubic binomial expansion of the nTh power of $x$, that is
+where $B_n(t)$ are the cubic Bernstein basis polynomials
 $$
-  k_0(x) = x^3, \; k_1(x)=3x^2(1-x), \; k_2(x)=3x(1-x)^2, \; k_3(x)=(1-x)^3.
+  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3.
 $$
 
-1. `TRIPLEx16`: Control points of Bezier patches, where each corresponds to the 16 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+1. `TRIPLEx16`: Control points: the $n$th entry is mapped to $p_{i,j}$ by `i=n/4` and `j=n%4`;
+2. `UINT`: Center index;
+3. `UINT`: Material index.
 
-Each control point `Points[n]` in `TRIPLE Points[16]` are mapped to $p_{i,j}$ by `i=n//4` and `j=n%4`.
+### Bezier triangle
 
-### Bezier Triangle
+Each [Bezier triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_triangle) contains
 
-Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_triangle]) contains
+1. `TRIPLEx10`: Control points;
+2. `UINT`: Center index;
+3. `UINT`: Material index.
 
-1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-
-### Bezier Patch (Color)
+### Bezier patch (color)
 
 Each Bezier Patch with per-vertex color contains
 
-1. `TRIPLEx16`: Control points of Bezier patches, where each corresponds to the 16 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-4. `RGBAx4`: The colors of each vertex, corresponding to the four corners of the Bezier patch.
+1. `TRIPLEx16`: Control points;
+2. `UINT`: Center index;
+3. `UINT`: Material index;
+4. `RGBAx4`: The colors to use for the four vertices, bilinearly interpolated over the surface.
 
-
-### Bezier Triangle (Color)
+### Bezier triangle (color)
 
 Each Bezier Triangle with per-vertex color contains
 
-1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-4. `RGBAx3`: The colors of each vertex, corresponding to the four corners of the Bezier triangle.
+1. `TRIPLEx10`: Control points of Bezier triangles, where each corresponds to the 10 Bezier control points;
+2. `UINT`: Center index;
+3. `UINT`: Material index;
+4. `RGBAx3`: The colors to use for the three vertices, bilinearly interpolated over the surface.
 
+### Straight planar quad
 
-### Straight Quad
+1. `TRIPLEx4`: Vertices of the specified rectangle;
+2. `UINT`: Center index;
+3. `UINT`: Material index.
 
-1. `TRIPLEx4`: Corners of the specified rectangle
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+### Straight triangle
 
-### Straight Triangle
+Each triangle contains
 
-Each [Bezier Triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_surface]) contains
+1. `TRIPLEx3`: Corner of the specified triangle;
+2. `UINT`: Center index;
+3. `UINT`: Material index.
 
-1. `TRIPLEx3`: Corner of the specified triangle
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-
-### Straight Quad (with vertex colors)
+### Straight planar quad (with vertex colors)
 
 Each Bezier Patch with per-vertex color contains
 
-1. `TRIPLEx4`: Corners of the specified rectangle
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-4. `RGBAx4`: The colors of each vertex, corresponding to the four corners of the Bezier patch.
+1. `TRIPLEx4`: Corners of the specified rectangle;
+2. `UINT`: Center index;
+3. `UINT`: Material index;
+4. `RGBAx4`: The colors to use for the four vertices, bilinearly interpolated over the surface.
 
-
-### Straight Triangle (with vertex colors)
+### Straight triangle (with vertex colors)
 
 Each Bezier Triangle with per-vertex color contains
 
-1. `TRIPLEx3`: Corner of the specified triangle
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`. If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
-4. `RGBAx3`: The colors of each vertex, corresponding to the four corners of the Bezier triangle.
+1. `TRIPLEx3`: Corner of the specified triangle;
+2. `UINT`: Center index;
+3. `UINT`: Material index;
+4. `RGBAx3`: The colors to use for the three vertices, bilinearly interpolated over the surface.
 
 ### Triangle groups
 
 This is a collection of triangles specified by a set of vertices, normals and indices constructing each triangle.
 Note that the indices of the triangle group always start with `0`, which means programs that read in V3D Files
 need to take note of the offset (number of position/normal entries) for formats that does not support segmentation of vertex entries, such as Wavefront `*.obj` file.
-Moreover, in certain formats like `*.obj`, indices start with `1` which means programs converting V3D to those formats need to add `1` to all indices written.
+Moreover, in certain formats like `*.obj` where indices start with `1`, programs converting V3D to those formats need to add `1` to the output indices.
 
 Each triangle group contains:
 
-1. `UINT`: Number of position vertex entries. Denote this as `NP`.
-2. `TRIPLExNP`: The entries of vertex positions. Denote this array `Triple Positions[NP]`
-3. `UINT`: Number of vertex normal entries. Denote this as `NN`.
-4. `TRIPLExNN`: The entries of vertex normals.
-5. `UINT`: Number of vertex color entries. Denote this as `NC`.
-6. `RGBAxNC`: The entries of vertex colors.
-7. `UINT`: Number of indices. Denote this number `NI`.
+1. `UINT`: Number of indices. Denote this as`nI`;
+2. `UINT`: Number of position vertex array entries. Denote this as `nP`;
+3. `TRIPLExnP`: Vertex position array;
+4. `UINT`: Number of vertex normal array entries. Denote this as `nN`;
+5. `TRIPLExnN`: Vertex normal array;
+6. `BOOL` Whether or not explict normal indices are present. Call this `explicitNI`;
+7. `UINT`: Number of vertex color array entries. Denote this as `nC`.
 
-Then, the triangle group contains `NI` number of the following:
+> #### The next two entries only appear if `nC > 0`:
+8. `RGBAxnC`: Vertex color array;
+9. `BOOL` Whether or not explict color indices are present. Call this `explicitCI`.
 
-> 1. `UINTx3`: Index of the position. These three unsigned integers `i,j,k` correspond to the index of the positions array as `Positions[i]`, `Positions[j]` and `Positions[k]` forming the face of the triangle.
-> 2. `BOOL` Whether or not normal indices is present. Call this `keepNI`
+Then, the triangle group contains `nI` entries of the form
+
+> 1. `UINTx3`: Vertex position array indices specifying the position of each of the three vertices.
 >
-> if `keepNI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the normal of each vertex corresponds to.
-> Otherwise, the normal index is the same as the position index.
+> #### The next entry only appears if `explicitNI=true`:
+> #### Otherwise, the normal indices are assumed to be identical to the position indices;
+> 2. `UINTx3`: Vertex normal array indices specifying the normal of each of the three vertices.
 >
-> #### The following section only applies if `NC>0`:
-> `BOOL` Whether or not color indices is present. Call this `keepCI`
-> if `keepCI==true`, then the file contains `UINTx3` normal indices denoting the index of normals array such that the color of each vertex corresponds to.
-> Otherwise, the color index is the same as the position index.
+> #### The remainder of this section only applies if `nC > 0`:
+> #### The next entry only appears if `explicitCI=true`:
+> #### Otherwise, the color indices are assumed to be identical to the position indices;
+> 3. `UINTx3`: Vertex color array indices specifying the color of each of the three vertices.
 
-#### The following section applies to all triangle groups regardless of `NC` and appears only once after all indices have been processed
-
-Then, the object contains `UINT` Center index and `UINT` Material Index like in the previous objects.
+Like the previous objects, a triangle group ends with
+8. `UINT` Center index
+9. `UINT` Material index.
 
 ### Sphere
 
@@ -175,22 +175,18 @@ A Sphere is specified by
 
 1. `TRIPLE`: Center of the sphere.
 2. `REAL`: Radius of the sphere
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+3. `UINT`: Center index.
+4. `UINT`: Material index.
 
 
 ### Hemisphere
 
-A Hemisphere is the half sphere specified by a base sphere and an angle in polar and azimuth angles
-(FIXME: in radians?) specifying the normal vector of the plane which partitions the sphere, with
-hemisphere being the side of the sphere normal vector faces.
+A Hemisphere is the half sphere specified by a base sphere and an angle in polar and azimuth angles in radians specifying the normal vector of the plane which partitions the sphere, with hemisphere being the side of the sphere normal vector faces.
 
 1. `TRIPLE`: Center of the sphere.
 2. `REAL`: Radius of the sphere
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+3. `UINT`: Center index.
+4. `UINT`: Material index.
 5. `REAL` Polar angle
 6. `REAL` Azimuth angle
 
@@ -200,9 +196,8 @@ A Disk is a planar filled circle specified by the center point, radius and angle
 
 1. `TRIPLE`: Center of the disk.
 2. `REAL`: Radius of the disk
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+3. `UINT`: Center index.
+4. `UINT`: Material index.
 5. `REAL` Polar angle
 6. `REAL` Azimuth angle
 
@@ -214,9 +209,8 @@ cylinder indicating how long the cylinder is extruded from the base disk.
 1. `TRIPLE`: Center of the disk.
 2. `REAL`: Radius of the disk
 3. `REAL`: Height of the cylinder
-4. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-5. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+4. `UINT`: Center index.
+5. `UINT`: Material index.
 6. `REAL` Polar angle
 7. `REAL` Azimuth angle.
 
@@ -226,12 +220,11 @@ A Tube is a deformed cylinder, without the end faces that follows a bezier curve
 
 1. `TRIPLEx4`: Four Bezier control points indicating the center "core" of the tube.
 2. `REAL`: Width of the tube
-3. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-4. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+3. `UINT`: Center index.
+4. `UINT`: Material index.
 5. `BOOL`: Whether or not the center curve should be drawn. This is called the "core" flag in Asymptote.
 
-### Bezier Curve
+### Bezier curve
 
 A Bezier curve is a curve specified by four control points $p, c_0, c_1, q \in \mathbb{R}^3$, producing a curve (which here, is described as a function $C: [0,1] \to \mathbb{R}^3$) by
 
@@ -242,24 +235,21 @@ $$
 Here, the curve is specified by four points by
 
 1. `TRIPLEx4` The control points p, c_0, c_1 and q respectively.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+2. `UINT`: Center index.
+3. `UINT`: Material index.
 
 ### Line
 
 A line is specified by
 
 1. `TRIPLEx2` The points p, q respectively where the line is specfied as the line from p to q.
-2. `UINT`: Center index. This corresponds to the index of an array of center points if index is `> 0`.
-   If Index is zero, denotes there is no center point associated with this object.
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+2. `UINT`: Center index.
+3. `UINT`: Material index.
 
 ### Pixel
 
-A "Pixel" here is a single point in a 3D space and a width quantity to specify the drawing size.
-In Asymptote, a "pixel" is drawn as a sphere with the radius as width.
+A `pixel` is a single point in 3D space drawn with a specified width measured in screen pixels.
 
-1. `TRIPLE`: The point specifying the pixel
-2. `REAL`: The drawing width of the pixel
-3. `UINT`: Material index. This is the index of the material array `Material` where `Material[i]` is the material of this object.
+1. `TRIPLE`: The position of the pixel;
+2. `REAL`: The drawing width of the pixel;
+3. `UINT`: Material index.

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+
 import xdrlib, gzip
 from typing import Callable
-from .enums.v3dtypes import v3dtypes
-from .enums.v3dheadertypes import v3dheadertypes
+from .v3dtypes import v3dtypes
+from .v3dheadertypes import v3dheadertypes
 from .v3dobjects import *
 
 
@@ -32,7 +33,7 @@ class V3DReader:
             v3dtypes.v3dtypes_tube: self.process_tube,
             v3dtypes.v3dtypes_curve: self.process_curve,
             v3dtypes.v3dtypes_line: self.process_line,
-            v3dtypes.v3dtypes_pixel_: self.process_pixel,
+            v3dtypes.v3dtypes_pixel: self.process_pixel,
             v3dtypes.v3dtypes_triangles: self.process_triangles
         }
 
@@ -98,6 +99,12 @@ class V3DReader:
         y = self.unpack_double()
         return x, y
 
+    def unpack_rgb_float(self) -> TY_RGB:
+        r = self._xdrfile.unpack_float()
+        g = self._xdrfile.unpack_float()
+        b = self._xdrfile.unpack_float()
+        return r, g, b
+
     def unpack_rgba_float(self) -> TY_RGBA:
         r = self._xdrfile.unpack_float()
         g = self._xdrfile.unpack_float()
@@ -129,26 +136,26 @@ class V3DReader:
             block_count = self._xdrfile.unpack_uint()
 
             if header_type == v3dheadertypes.v3dheadertypes_canvasWidth:
-                header.canvas_width = self._xdrfile.unpack_uint()
+                header.canvasWidth = self._xdrfile.unpack_uint()
             elif header_type == v3dheadertypes.v3dheadertypes_canvasHeight:
-                header.canvas_height = self._xdrfile.unpack_uint()
-            elif header_type == v3dheadertypes.v3dheadertypes_b:
-                header.b = self.unpack_triple()
-            elif header_type == v3dheadertypes.v3dheadertypes_B:
-                header.B = self.unpack_triple()
+                header.canvasHeight = self._xdrfile.unpack_uint()
+            elif header_type == v3dheadertypes.v3dheadertypes_minBound:
+                header.minBound = self.unpack_triple()
+            elif header_type == v3dheadertypes.v3dheadertypes_maxBound:
+                header.maxBound = self.unpack_triple()
             elif header_type == v3dheadertypes.v3dheadertypes_orthographic:
                 header.orthographic = self.unpack_bool()
-            elif header_type == v3dheadertypes.v3dheadertypes_angle_:
-                header.angle = self.unpack_double()
-            elif header_type == v3dheadertypes.v3dheadertypes_Zoom0:
-                header.Zoom0 = self.unpack_double()
-            elif header_type == v3dheadertypes.v3dheadertypes_viewportMargin:
-                header.viewport_margin = self.unpack_pair()
+            elif header_type == v3dheadertypes.v3dheadertypes_angleOfView:
+                header.angleOfView = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_initialZoom:
+                header.initialZoom = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_viewportShift:
-                header.viewport_shift = self.unpack_pair()
+                header.viewportShift = self.unpack_pair()
+            elif header_type == v3dheadertypes.v3dheadertypes_viewportMargin:
+                header.viewportMargin = self.unpack_pair()
             elif header_type == v3dheadertypes.v3dheadertypes_light:
                 position = self.unpack_triple()
-                color = self.unpack_rgba_float()
+                color = self.unpack_rgb_float()
                 header.lights.append(V3DSingleLightSource(position, color))
             elif header_type == v3dheadertypes.v3dheadertypes_background:
                 header.background = self.unpack_rgba_float()
@@ -156,17 +163,17 @@ class V3DReader:
                 # Configuration from now on
                 header.configuration.absolute = self.unpack_bool()
             elif header_type == v3dheadertypes.v3dheadertypes_zoomFactor:
-                header.configuration.zoom_factor = self.unpack_double()
+                header.configuration.zoomFactor = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_zoomPinchFactor:
-                header.configuration.zoom_pinch_factor = self.unpack_double()
+                header.configuration.zoomPinch_factor = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_zoomStep:
-                header.configuration.zoom_step = self.unpack_double()
+                header.configuration.zoomStep = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_shiftHoldDistance:
-                header.configuration.shift_hold_distance = self.unpack_double()
+                header.configuration.shiftHoldDistance = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_shiftWaitTime:
-                header.configuration.shift_wait_time = self.unpack_double()
+                header.configuration.shiftWaitTime = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_vibrateTime:
-                header.configuration.vibrate_time = self.unpack_double()
+                header.configuration.vibrateTime = self.unpack_double()
             else:
                 for _ in range(block_count):
                     self._xdrfile.unpack_uint()
@@ -336,7 +343,7 @@ class V3DReader:
         diffuse = self.unpack_rgba_float()
         emissive = self.unpack_rgba_float()
         specular = self.unpack_rgba_float()
-        shininess, metallic, f0, _ = self.unpack_rgba_float()
+        shininess, metallic, f0 = self.unpack_rgb_float()
         return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0)
 
     def process_centers(self) -> List[TY_TRIPLE]:
@@ -352,18 +359,22 @@ class V3DReader:
     def process_triangles(self) -> Union[V3DTriangleGroups, V3DTriangleGroupsColor]:
         is_color = False
 
+        num_idx = self._xdrfile.unpack_uint()
+
         num_pos = self._xdrfile.unpack_uint()
         positions = self.unpack_triple_n(num_pos)
 
         num_normal = self._xdrfile.unpack_uint()
         normals = self.unpack_triple_n(num_normal)
 
+        explicitNI = self.unpack_bool()
+
         num_color = self._xdrfile.unpack_uint()
-        colors = None
 
         if num_color > 0:
             is_color = True
             colors = self.unpack_rgba_float_n(num_color)
+            explicitCi = self.unpack_bool()
 
         pos_indices = []
         normal_indices = []
@@ -372,16 +383,13 @@ class V3DReader:
         if is_color:
             color_indices = []
 
-        num_idx = self._xdrfile.unpack_uint()
         for _ in range(num_idx):
             pos_idx = self._unpack_int_indices()
-            keep_ni = self.unpack_bool()
-            nor_idx = self._unpack_int_indices() if keep_ni else list(pos_idx)
+            nor_idx = self._unpack_int_indices() if explicitNI else list(pos_idx)
 
             col_idx = None
             if is_color:
-                keep_ci = self.unpack_bool()
-                col_idx = self._unpack_int_indices() if keep_ci else list(pos_idx)
+                col_idx = self._unpack_int_indices() if explicitCi else list(pos_idx)
 
             pos_indices.append(tuple(pos_idx))
             normal_indices.append(tuple(nor_idx))
@@ -415,7 +423,7 @@ class V3DReader:
             self.unpack_double = self._xdrfile.unpack_float
 
         while typ := self.get_obj_type():
-            if typ == v3dtypes.v3dtypes_material_:
+            if typ == v3dtypes.v3dtypes_material:
                 self._materials.append(self.process_material())
             elif typ == v3dtypes.v3dtypes_centers:
                 self._centers = self.process_centers()
@@ -433,6 +441,7 @@ class V3DReader:
 
 
 def main():
+    # asy -fv3d 2 -c "import teapot;" -o teapot
     v3d_obj = V3DReader.from_file_name('teapot.v3d')
     print(v3d_obj.objects)
     pass

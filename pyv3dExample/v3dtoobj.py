@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from pyv3d import V3DReader
 from pyv3d.v3dobjects import V3DTriangleGroups
 import gzip
@@ -24,7 +26,7 @@ class V3DToObjWriter(V3DReader):
             for object in self.objects:
                 if not isinstance(object, V3DTriangleGroups):
                     break
-                fil.write('g bzpatch_{0}\n'.format(k))
+                fil.write('g triangles_{0}\n'.format(k))
                 for x,y,z in object.positions:
                     fil.write('v {0} {1} {2}\n'.format(
                         x*scale, y*scale, z*scale))
@@ -48,9 +50,9 @@ class V3DToObjWriter(V3DReader):
 
 def main():
     # produce v3d file with
-    # asy -fv3d -prerender 2 examples/teapot.asy -oteapot_baked
-    reader = V3DToObjWriter.from_file_name('teapot_baked.v3d')
-    reader.write_obj('teapot_baked.obj', 0.01)
+    # asy -fv3d -prerender 2 -c "import teapot;" -o teapot
+    reader = V3DToObjWriter.from_file_name('teapot.v3d')
+    reader.write_obj('teapot.obj', 0.01)
 
 
 if __name__ == '__main__':

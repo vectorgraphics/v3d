@@ -4,6 +4,7 @@ from typing import Union, Tuple, List
 
 TY_PAIR = Tuple[float, float]
 TY_TRIPLE = Tuple[float, float, float]
+TY_RGB = Tuple[float, float, float]
 TY_RGBA = Tuple[float, float, float, float]
 
 TY_BEZIER_PATCH = Union[Tuple[

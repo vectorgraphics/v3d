@@ -23,7 +23,7 @@ class V3DMaterial(AV3Dobject):
 
 
 class V3DSingleLightSource:
-    def __init__(self, position: TY_TRIPLE, color: TY_RGBA):
+    def __init__(self, position: TY_TRIPLE, color: TY_RGB):
         self.position = position
         self.color = color
 
@@ -31,26 +31,26 @@ class V3DSingleLightSource:
 class V3DConfigurationValue:
     def __init__(self):
         self.absolute: Optional[bool] = None
-        self.zoom_factor: Optional[float] = None
-        self.zoom_pinch_factor: Optional[float] = None
-        self.zoom_pinch_cap: Optional[float] = None
-        self.zoom_step: Optional[float] = None
-        self.shift_hold_distance: Optional[float] = None
-        self.shift_wait_time: Optional[float] = None
-        self.vibrate_time: Optional[float] = None
+        self.zoomFactor: Optional[float] = None
+        self.zoomPinchFactor: Optional[float] = None
+        self.zoomPinchCap: Optional[float] = None
+        self.zoomStep: Optional[float] = None
+        self.shiftHoldDistance: Optional[float] = None
+        self.shiftWaitTime: Optional[float] = None
+        self.vibrateTime: Optional[float] = None
 
 
 class V3DHeaderInformation:
     def __init__(self):
-        self.canvas_width: Optional[int] = None
-        self.canvas_height: Optional[int] = None
-        self.b: Optional[TY_TRIPLE] = None
-        self.B: Optional[TY_TRIPLE] = None
+        self.canvasWidth: Optional[int] = None
+        self.canvasHeight: Optional[int] = None
+        self.minBound: Optional[TY_TRIPLE] = None
+        self.maxBound: Optional[TY_TRIPLE] = None
         self.orthographic: Optional[bool] = None
-        self.angle: Optional[float] = None
-        self.Zoom0: Optional[float] = None
-        self.viewport_margin: Optional[TY_PAIR] = None
-        self.viewport_shift: TY_PAIR = (0.0, 0.0)
+        self.angleOfView: Optional[float] = None
+        self.initialZoom: Optional[float] = None
+        self.viewportShift: TY_PAIR = (0.0, 0.0)
+        self.viewportMargin: Optional[TY_PAIR] = None
         self.lights: List[V3DSingleLightSource] = []
         self.background: TY_RGBA = (1.0, 1.0, 1.0, 1.0)
         self.configuration: V3DConfigurationValue = V3DConfigurationValue()
@@ -203,4 +203,3 @@ class V3DPixel(AV3Dobject):
         super().__init__(material_id, center_index)
         self.point = point
         self.width = width
-
