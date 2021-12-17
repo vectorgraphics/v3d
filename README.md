@@ -232,7 +232,7 @@ A tube is a deformed cylinder, without end faces, whose center line follows a Be
 
 ### Bezier curve
 
-A Bezier curve is a curve specified by four control points $`z_0, c_0, c_1, z_1 \in \mathbb{R}^3`$, producing a curve (which here, is described as a function $`C: [0,1] \to \mathbb{R}^3`$) by
+A Bezier curve is specified by four control points $`z_0, c_0, c_1, z_1 \in \mathbb{R}^3`$ that, generate a curve $`C`$ on $`[0,1]`$:
 
 ```math
 C: [0,1] \to \mathbb{R}^3, \quad t \mapsto (1-t)^3z_0 + 3t(1-t^2)c_0 + 3t^2(1-t)c_1 + t^3z_1.
