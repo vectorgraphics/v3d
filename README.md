@@ -74,9 +74,9 @@ Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) is a set of 16
 ```
 
 where $`B_n(t)`$ are the cubic Bernstein basis polynomials
-$$
+```math
   B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3.
-$$
+```
 
 1. `TRIPLEx16`: Control points: $`p_{i,j}`$ is stored in entry $`4i+j`$;
 2. `UINT`: Center index;
@@ -234,9 +234,9 @@ A tube is a deformed cylinder, without end faces, whose center line follows a Be
 
 A Bezier curve is a curve specified by four control points $`z_0, c_0, c_1, z_1 \in \mathbb{R}^3`$, producing a curve (which here, is described as a function $`C: [0,1] \to \mathbb{R}^3$) by
 
-$$
+```math
 C: [0,1] \to \mathbb{R}^3, \quad t \mapsto (1-t)^3z_0 + 3t(1-t^2)c_0 + 3t^2(1-t)c_1 + t^3z_1.
-$$
+```
 
 The Bezier curve is specified by:
 
