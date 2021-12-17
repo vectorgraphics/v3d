@@ -66,14 +66,12 @@ V3D materials are specified by their metallic-roughness physical-based rendering
 4. `FLOATx3`: Parameters `shininess, metallic, fresnel0`. Here, `fresnel0` measures how much a dielectric surface reflects incoming light when viewed perpendicular to the surface.
 
 ### Bezier patch
-w
-Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) is a set of 16 control points 
 
-<img src="https://render.githubusercontent.com/render/math?math=P_{i,j} \in \mathbb{R}^3, i,j\in \{0,1,2,3\}">, producing a surface $\Phi$ parameterized by $u,v \in [0,1]$ as a function
+Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) is a set of 16 control points $`P_{i,j} \in \mathbb{R}^3`$ where $`i,j\in \{0,1,2,3\}`$, producing a surface $\Phi$ parameterized by $u,v \in [0,1]$ as a function
 
-$$
+$$`
 \Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 B_i(u) \sum_{i=0}^3 B_j(v)P_{i,j}
-$$
+`$$
 
 where $B_n(t)$ are the cubic Bernstein basis polynomials
 $$
