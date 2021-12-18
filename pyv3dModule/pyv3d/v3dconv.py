@@ -2,9 +2,9 @@
 
 import xdrlib, gzip
 from typing import Callable
-from .v3dtypes import v3dtypes
-from .v3dheadertypes import v3dheadertypes
-from .v3dobjects import *
+from pyv3d.v3dtypes import v3dtypes
+from pyv3d.v3dheadertypes import v3dheadertypes
+from pyv3d.v3dobjects import *
 
 
 class V3DReader:

@@ -3,7 +3,6 @@
 from .typehints import *
 from typing import Optional
 
-
 class AV3Dobject:
     def __init__(self, material_id: Optional[int] = None, center_index: Optional[int] = None):
         self.material_id = material_id

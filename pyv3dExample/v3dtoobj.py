@@ -4,7 +4,6 @@ from pyv3d import V3DReader
 from pyv3d.v3dobjects import V3DTriangleGroups
 import gzip
 
-
 class V3DToObjWriter(V3DReader):
     def __init__(self, fil: gzip.GzipFile):
         super().__init__(fil)
