@@ -6,7 +6,6 @@ from pyv3d.v3dtypes import v3dtypes
 from pyv3d.v3dheadertypes import v3dheadertypes
 from pyv3d.v3dobjects import *
 
-
 class V3DReader:
     def __init__(self, fil: gzip.GzipFile):
         self._objects: List[AV3Dobject] = []
@@ -39,7 +38,6 @@ class V3DReader:
 
         self._xdrfile = xdrlib.Unpacker(fil.read())
         self.unpack_double: Callable[[], float] = self._xdrfile.unpack_double
-        self._allow_double_precision: bool = True
 
     @classmethod
     def from_file_name(cls, file_name: str):
@@ -75,11 +73,6 @@ class V3DReader:
     def file_version(self) -> Optional[bool]:
         self.process()
         return self._file_ver
-
-    @property
-    def allow_double_precision(self) -> Optional[float]:
-        self.process()
-        return self._allow_double_precision
 
     def get_obj_type(self) -> Optional[int]:
         try:

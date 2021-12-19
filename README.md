@@ -2,10 +2,18 @@
 
 This repository contains the specification for the V3D file format, a compact 3D graphics file format for Bezier curves, Bezier patches, Bezier triangles, and triangle groups, all with optional vertex-dependent colors.
 
-A reference Python module `pyv3d` for reading in V3D is included in the `pyv3dModule`directory, along with an example of its usage in the `pyv3dExample`directory.
+A reference Python module `pyv3d` for reading in V3D is included in the `module`directory, along with an example of its usage in the `example`directory.
+
+To build and install `pyv3d`:
+
+```
+cd module
+python3 -m build
+pip3 install --user dist/pyv3d-0-py3-none-any.whl
+```
 
 ## Authors
-The authors of V3D are John C. Bowman <bowman@ualberta.ca> and
+The authors of the V3D file format are John C. Bowman <bowman@ualberta.ca> and
 Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com>
 
 # V3D Specifications
