@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Enum class for v3dtypes
 """ AUTO-GENERATED from v3dtypes.csv """
-# Generated at 2021-12-13 21:14:52.227706
+# Generated at 2021-12-22 20:55:44.737122
 
 class v3dtypes:
     v3dtypes_material=1

@@ -26,9 +26,11 @@ Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com>
 2. `BOOL`: Unsigned 32-bit integer, denoting False if the value is `0` and True otherwise;
 3. `REAL`: A double or single floating point value, depending on the double precision flag, as described in the next section;
 4. `FLOAT`: A single precision 32-bit IEEE 754 Floating point value;
-5. `TRIPLE`: An alias for `REALx3`;
-6. `RGBA`: `An alias for FLOATx4`, where the elements respectively correspond to the red, green, blue, and alpha channels between `0.0` to `1.0`;
-7. `WORD`: A 4-byte word.
+5. `PAIR`: An alias for `REALx2`;
+6. `TRIPLE`: An alias for `REALx3`;
+7. `RGB`: `An alias for FLOATx3`, where the elements respectively correspond to red, green, and blue between `0.0` to `1.0`;
+8. `RGBA`: `An alias for FLOATx4`, where the elements respectively correspond to red, green, blue, and alpha channels between `0.0` to `1.0`;
+9. `WORD`: A 4-byte word.
 
 ## Basic information
 
@@ -54,12 +56,11 @@ A V3D Header is a special type of object that starts with a `UINT` number indica
 
 Each header entry consists of
 1. `UINT`: Header key;
-2. `UINT`: length of the content measured in units of 4-byte words. Call this length `n`. For example, `n=2` for a header with one double-precision number.
+2. `UINT`: length of the content measured in units of 4-byte words. Call this length `n`. For example, `n=2` for a header with one double-precision number;
 3. `WORDxn`: The header content of length `n` words of types dependent on the header key.
 
 See [V3D header types](https://raw.githubusercontent.com/vectorgraphics/asymptote/HEAD/v3dheadertypes.csv) for the list of V3D headers and their corresponding keys.
 
-A description of the headers is available at https://raw.githubusercontent.com/vectorgraphics/asymptote/HEAD/webgl/gl.js
 ## V3D objects
 
 The content following the type number is described for each of the following types.

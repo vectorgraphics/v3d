@@ -27,10 +27,10 @@ class V3DToObjWriter(V3DReader):
                     break
                 fil.write('g triangles_{0}\n'.format(k))
                 for x,y,z in object.positions:
-                    fil.write('v {0} {1} {2}\n'.format(
+                    fil.write('v {0:.6f} {1:.6f} {2:.6f}\n'.format(
                         x*scale, y*scale, z*scale))
                 for normal in object.normals:
-                    fil.write('vn {0} {1} {2}\n'.format(*normal))
+                    fil.write('vn {0:.6f} {1:.6f} {2:.6f}\n'.format(*normal))
 
                 for i in range(len(object.position_indices)):
                     px, py, pz = object.position_indices[i]

@@ -434,7 +434,7 @@ class V3DReader:
 
 
 def main():
-    # asy -fv3d 2 -c "import teapot;" -o teapot
+    # asy -fv3d -c "import teapot;" -o teapot
     v3d_obj = V3DReader.from_file_name('teapot.v3d')
     print(v3d_obj.objects)
     pass
