@@ -1,4 +1,4 @@
-# V3D File Format Specification and Reference Toolset: Version 0
+# V3D File Format Specification and Reference Toolset: Version 1
 
 This repository contains the specification for the V3D file format, a compact 3D graphics file format for Bezier curves, Bezier patches, Bezier triangles, and triangle groups, all with optional vertex-dependent colors.
 
@@ -9,14 +9,14 @@ To build and install `pyv3d`:
 ```
 cd module
 python3 -m build
-pip3 install --user dist/pyv3d-0-py3-none-any.whl
+pip3 install --user dist/pyv3d-1.0-py3-none-any.whl
 ```
 
 ## Authors
 The authors of the V3D file format are John C. Bowman <bowman@ualberta.ca> and
 Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com>
 
-# V3D Specifications
+# V3D Specification
 
 ## Conventions
 
@@ -65,6 +65,13 @@ See [V3D header types](https://raw.githubusercontent.com/vectorgraphics/asymptot
 
 The content following the type number is described for each of the following types.
 
+### Centers
+
+Each center position is a point in 3D space about which a billboard surface should rotate so as to always face the camera.
+
+1. `UINT`: Number `n` of center positions;
+2. `TRIPLExn`: Center positions.
+
 ### Material
 
 V3D materials are specified by their metallic-roughness physical-based rendering properties, where `shininess=1-roughness`:
@@ -84,7 +91,7 @@ Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) contains a set
 
 where $`B_n(t)`$ are the cubic Bernstein basis polynomials
 ```math
-  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3:
+  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3,
 ```
 
 1. `TRIPLEx16`: Control points $`p_{i,j}`$ stored in entry $`4i+j`$;
@@ -151,7 +158,7 @@ Each triangle with per-vertex color contains
 3. `UINT`: Material index;
 4. `RGBAx3`: The colors assigned to the three vertices, bilinearly interpolated over the surface.
 
-### Triangle groups
+### Triangle group
 
 A triangle group is a collection of triangles specified by arrays of positions, normals, and index triplets identifying the entries in the position and normal arrays assigned to the three vertices of each triangle in the group.
 
@@ -207,7 +214,7 @@ A hemisphere is the half sphere specified by a base sphere and (polar, azimuthal
 5. `REAL`: Polar angle;
 6. `REAL`: Azimuthal angle.
 
-### Disks
+### Disk
 
 A disk is a planar filled circle specified by the center point, radius, and (polar, azimuthal) direction in radians of the surface normal:
 
@@ -230,7 +237,7 @@ A cylinder is specified by the center and radius of a bottom disk, with normal v
 6. `REAL` Polar angle;
 7. `REAL` Azimuthal angle.
 
-### Tubes
+### Tube
 
 A tube is a deformed cylinder, without end faces, whose center line follows a Bezier curve:
 
