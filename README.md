@@ -1,4 +1,4 @@
-# V3D File Format Specification and Reference Toolset: Version 0
+# V3D File Format Specification and Reference Toolset: Version 1
 
 This repository contains the specification for the V3D file format, a compact 3D graphics file format for Bezier curves, Bezier patches, Bezier triangles, and triangle groups, all with optional vertex-dependent colors.
 
@@ -9,14 +9,14 @@ To build and install `pyv3d`:
 ```
 cd module
 python3 -m build
-pip3 install --user dist/pyv3d-0-py3-none-any.whl
+pip3 install --user dist/pyv3d-1-py3-none-any.whl
 ```
 
 ## Authors
 The authors of the V3D file format are John C. Bowman <bowman@ualberta.ca> and
 Supakorn "Jamie" Rassameemasmuang <jamievlin@outlook.com>
 
-# V3D Specifications
+# V3D Specification
 
 ## Conventions
 
@@ -84,7 +84,7 @@ Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) contains a set
 
 where $`B_n(t)`$ are the cubic Bernstein basis polynomials
 ```math
-  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3:
+  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3,
 ```
 
 1. `TRIPLEx16`: Control points $`p_{i,j}`$ stored in entry $`4i+j`$;

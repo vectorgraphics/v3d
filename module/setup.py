@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 setup(name='pyv3d',
-      version='0',
+      version='1',
       description='Python library for reading V3D Files',
       url='https://gitlab.com/vectorgraphics/v3d',
       author='Supakorn "Jamie" Rassamememasmuang and John C. Bowman',
