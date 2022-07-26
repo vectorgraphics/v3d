@@ -7,6 +7,7 @@ A reference Python module `pyv3d` for reading in V3D is included in the `module`
 To build and install `pyv3d`:
 
 ```
+pip3 install build
 cd module
 python3 -m build
 pip3 install --user dist/pyv3d-1.0-py3-none-any.whl
