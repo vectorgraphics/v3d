@@ -86,13 +86,11 @@ V3D materials are specified by their metallic-roughness physical-based rendering
 Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) contains a set of 16 control points $P_{i,j} \in \mathbb{R}^3$, where $i,j\in \{0,1,2,3\}$, producing a surface $\Phi$ parametrized by $u,v \in [0,1]$:
 
 $$
-\Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 B_i(u) \sum_{i=0}^3 B_j(v)P_{i,j},
+\Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 B_i(u) \sum_{j=0}^3 B_j(v)P_{i,j},
 $$
 
-where $B_n(t)$ are the cubic Bernstein basis polynomials
-$$
-  B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3,
-$$
+where $B_i(t)$ are the cubic Bernstein basis polynomials
+$B_0(t) = t^3$, $B_1(t)=3t^2(1-t)$, $B_2(t)=3t(1-t)^2$, and $B_3(t)=(1-t)^3$.
 
 1. `TRIPLEx16`: Control points $p_{i,j}$ stored in entry $4i+j$;
 2. `UINT`: Center index;
