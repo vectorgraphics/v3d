@@ -83,18 +83,18 @@ V3D materials are specified by their metallic-roughness physical-based rendering
 
 ### Bezier patch
 
-Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) contains a set of 16 control points $`P_{i,j} \in \mathbb{R}^3`$, where $`i,j\in \{0,1,2,3\}`$, producing a surface $`\Phi`$ parametrized by $`u,v \in [0,1]`$:
+Each [Bezier patch](https://en.wikipedia.org/wiki/Bézier_surface) contains a set of 16 control points $P_{i,j} \in \mathbb{R}^3$, where $i,j\in \{0,1,2,3\}$, producing a surface $\Phi$ parametrized by $u,v \in [0,1]$:
 
-```math
+$$
 \Phi: [0,1]^2 \to \mathbb{R}^3, \quad (u,v) \mapsto \sum_{i=0}^3 B_i(u) \sum_{i=0}^3 B_j(v)P_{i,j},
-```
+$$
 
-where $`B_n(t)`$ are the cubic Bernstein basis polynomials
-```math
+where $B_n(t)$ are the cubic Bernstein basis polynomials
+$$
   B_0(t) = t^3, \; B_1(t)=3t^2(1-t), \; B_2(t)=3t(1-t)^2, \; B_3(t)=(1-t)^3,
-```
+$$
 
-1. `TRIPLEx16`: Control points $`p_{i,j}`$ stored in entry $`4i+j`$;
+1. `TRIPLEx16`: Control points $p_{i,j}$ stored in entry $4i+j$;
 2. `UINT`: Center index;
 3. `UINT`: Material index.
 
@@ -102,7 +102,7 @@ where $`B_n(t)`$ are the cubic Bernstein basis polynomials
 
 Each [Bezier triangle](https://en.wikipedia.org/wiki/B%C3%A9zier_triangle) contains
 
-1. `TRIPLEx10`: Control points $`p_{i,j,3-i-j}`$ stored in entry $`(i+j)(i+j+1)/2+j`$;
+1. `TRIPLEx10`: Control points $p_{i,j,3-i-j}$ stored in entry $(i+j)(i+j+1)/2+j$;
 2. `UINT`: Center index;
 3. `UINT`: Material index.
 
@@ -249,15 +249,15 @@ A tube is a deformed cylinder, without end faces, whose center line follows a Be
 
 ### Bezier curve
 
-A Bezier curve is specified by four control points $`z_0, c_0, c_1, z_1 \in \mathbb{R}^3`$ that generate a curve $`C`$ on $`[0,1]`$:
+A Bezier curve is specified by four control points $z_0, c_0, c_1, z_1 \in \mathbb{R}^3$ that generate a curve $C$ on $[0,1]$:
 
-```math
+$$
 C: [0,1] \to \mathbb{R}^3, \quad t \mapsto (1-t)^3z_0 + 3t(1-t^2)c_0 + 3t^2(1-t)c_1 + t^3z_1.
-```
+$$
 
 A Bezier curve is specified by:
 
-1. `TRIPLEx4` The control points $`z_0, c_0, c_1, z_1`$;
+1. `TRIPLEx4` The control points $z_0, c_0, c_1, z_1$;
 2. `UINT`: Center index;
 3. `UINT`: Material index.
 
@@ -265,7 +265,7 @@ A Bezier curve is specified by:
 
 A line segment is specified by:
 
-1. `TRIPLEx2` The endpoints $`z_0, z_1`$;
+1. `TRIPLEx2` The endpoints $z_0, z_1$;
 2. `UINT`: Center index;
 3. `UINT`: Material index.
 
