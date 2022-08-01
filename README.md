@@ -159,14 +159,14 @@ Each triangle with per-vertex color contains
 
 ### Triangle group
 
-A triangle group is a collection of triangles specified by arrays of positions, normals, and index triplets identifying the entries in the position and normal arrays assigned to the three vertices of each triangle in the group.
+A triangle group is a collection of triangles specified by arrays of positions, normals, optional colors, and index triplets identifying the entries in the position, normal, and optional color arrays assigned to the three vertices of each triangle in the group. If more than one normal or color is specified for a vertex, the last one is used.
 
 The indices of every triangle group begins with `0`, which means programs that read in V3D Files need to take note of the offset (number of position/normal entries) for formats that does not support segmentation of vertex entries, such as Wavefront `*.obj` file. Moreover, in certain formats like `*.obj` where indices start with `1`, programs converting V3D to those formats need to add `1` to the output indices.
 
 Each triangle group contains:
 
 1. `UINT`: Number of indices. Denote this as `nI`;
-2. `UINT`: Number of position vertex array entries. Denote this as `nP`;
+2. `UINT`: Number of vertex position array entries. Denote this as `nP`;
 3. `TRIPLExnP`: Vertex position array;
 4. `UINT`: Number of vertex normal array entries. Denote this as `nN`;
 5. `TRIPLExnN`: Vertex normal array;
