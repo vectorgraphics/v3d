@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import xdrlib, gzip
+import gzip
 from typing import Callable
+from pyv3d.xdrlib import Unpacker
 from pyv3d.v3dtypes import v3dtypes
 from pyv3d.v3dheadertypes import v3dheadertypes
 from pyv3d.v3dobjects import *
@@ -36,7 +37,7 @@ class V3DReader:
             v3dtypes.v3dtypes_triangles: self.process_triangles
         }
 
-        self._xdrfile = xdrlib.Unpacker(fil.read())
+        self._xdrfile = Unpacker(fil.read())
         self.unpack_double: Callable[[], float] = self._xdrfile.unpack_double
 
     @classmethod
