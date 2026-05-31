@@ -1,4 +1,4 @@
-# V3D File Format Specification and Reference Toolset: Version 1
+# V3D File Format Specification and Reference Toolset: Version 2
 
 This repository contains the specification for the V3D file format, a compact 3D graphics file format for Bezier curves, Bezier patches, Bezier triangles, and triangle groups, all with optional vertex-dependent colors.
 
@@ -80,7 +80,7 @@ V3D materials are specified by their metallic-roughness physical-based rendering
 1. `RGBA`: Diffuse (base) color of the material;
 2. `RGBA`: Emissive color of the material;
 3. `RGBA`: Specular color (used to weight the reflectance of nonmetals);
-4. `FLOATx3`: Parameters `shininess, metallic, fresnel0`. Here, `fresnel0` measures how much a dielectric surface reflects incoming light when viewed perpendicular to the surface.
+4. `FLOATx4`: Parameters `shininess, metallic, fresnel0, lightOn`. Here, `fresnel0` measures how much a dielectric surface reflects incoming light when viewed perpendicular to the surface. When `lightOn` is nonzero, PBR lighting is enabled; when zero, the material is rendered as emissive (unlit).
 
 ### Bezier patch
 
