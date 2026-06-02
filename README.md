@@ -235,6 +235,7 @@ A cylinder is specified by the center and radius of a bottom disk, with normal v
 5. `UINT`: Material index;
 6. `REAL` Polar angle;
 7. `REAL` Azimuthal angle.
+8. `BOOL`: Whether or not the center curve should be drawn. This is called the "core" flag in Asymptote.
 
 ### Tube
 
