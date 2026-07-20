@@ -170,8 +170,11 @@ class V3DReader:
                 header.configuration.vibrateTime = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_imagePath:
                 n = self._xdrfile.unpack_uhyper()
-                raw = self._xdrfile.get_buffer()[self._xdrfile.get_position():self._xdrfile.get_position()+n]
-                self._xdrfile.set_position(self._xdrfile.get_position() + n)
+                pos = self._xdrfile.get_position()
+                raw = self._xdrfile.get_buffer()[pos:pos+n]
+                # Advance to (n+3)/4 words worth of bytes to match getWordSize
+                totalBytes = ((n + 3) // 4) * 4
+                self._xdrfile.set_position(pos + totalBytes)
                 header.image = raw.decode('utf-8')
             else:
                 for _ in range(block_count):
@@ -343,7 +346,9 @@ class V3DReader:
         emissive = self.unpack_rgba_float()
         specular = self.unpack_rgba_float()
         shininess, metallic, f0 = self.unpack_rgb_float()
-        return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0)
+        lightOn_f = self._xdrfile.unpack_float()
+        lightOn = lightOn_f != 0.0
+        return V3DMaterial(diffuse, emissive, specular, shininess, metallic, f0, lightOn)
 
     def process_centers(self) -> List[TY_TRIPLE]:
         number_centers = self._xdrfile.unpack_uint()

@@ -11,7 +11,8 @@ class AV3Dobject:
 
 class V3DMaterial(AV3Dobject):
     def __init__(self, diffuse: TY_RGBA, emissive: TY_RGBA, specular: TY_RGBA,
-                 metallic: float = 0, shininess: float = 0.8, f0: float = 0.4):
+                 metallic: float = 0, shininess: float = 0.8, f0: float = 0.4,
+                 lightOn: bool = True):
         super().__init__()
         self.diffuse = diffuse
         self.emissive = emissive
@@ -19,6 +20,7 @@ class V3DMaterial(AV3Dobject):
         self.metallic = metallic
         self.shininess = shininess
         self.f0 = f0
+        self.lightOn = lightOn
 
 
 class V3DSingleLightSource:
