@@ -168,6 +168,11 @@ class V3DReader:
                 header.configuration.shiftWaitTime = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_vibrateTime:
                 header.configuration.vibrateTime = self.unpack_double()
+            elif header_type == v3dheadertypes.v3dheadertypes_imagePath:
+                n = self._xdrfile.unpack_uhyper()
+                raw = self._xdrfile.get_buffer()[self._xdrfile.get_position():self._xdrfile.get_position()+n]
+                self._xdrfile.set_position(self._xdrfile.get_position() + n)
+                header.image = raw.decode('utf-8')
             else:
                 for _ in range(block_count):
                     self._xdrfile.unpack_uint()

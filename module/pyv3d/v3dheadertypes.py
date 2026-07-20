@@ -61,4 +61,7 @@ class v3dheadertypes:
     v3dheadertypes_vibrateTime=19
     # REAL  Shift-mode vibrate time (milliseconds)
 
+    v3dheadertypes_imagePath=20
+    # STRING  IBL image path: imageDir/image
+
 # End of File

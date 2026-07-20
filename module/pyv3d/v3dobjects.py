@@ -53,6 +53,7 @@ class V3DHeaderInformation:
         self.lights: List[V3DSingleLightSource] = []
         self.background: TY_RGBA = (1.0, 1.0, 1.0, 1.0)
         self.configuration: V3DConfigurationValue = V3DConfigurationValue()
+        self.image: Optional[str] = None
 
 
 class V3DBezierPatch(AV3Dobject):
