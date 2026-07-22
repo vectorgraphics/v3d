@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # Enum class for v3dheadertypes
-""" AUTO-GENERATED from v3dheadertypes.csv """
-# Generated at 2021-12-22 20:55:44.823613
-
+""" AUTO-GENERATED from /home/ai/asymptote/v3dheadertypes.csv """
 class v3dheadertypes:
     v3dheadertypes_canvasWidth=1
     # UINT  Canvas width
@@ -23,7 +21,7 @@ class v3dheadertypes:
     # BOOL  true: orthographic; false: perspective
 
     v3dheadertypes_angleOfView=7
-    # REAL  Field of view angle
+    # REAL  Field of view angle (in radians)
 
     v3dheadertypes_initialZoom=8
     # REAL  Initial zoom
@@ -61,7 +59,7 @@ class v3dheadertypes:
     v3dheadertypes_vibrateTime=19
     # REAL  Shift-mode vibrate time (milliseconds)
 
-    v3dheadertypes_imagePath=20
-    # STRING  IBL image path: imageDir/image
+    v3dheadertypes_imageName=20
+    # STRING  IBL environment map identifier (relative path or bare name)
 
 # End of File

@@ -168,7 +168,7 @@ class V3DReader:
                 header.configuration.shiftWaitTime = self.unpack_double()
             elif header_type == v3dheadertypes.v3dheadertypes_vibrateTime:
                 header.configuration.vibrateTime = self.unpack_double()
-            elif header_type == v3dheadertypes.v3dheadertypes_imagePath:
+            elif header_type == v3dheadertypes.v3dheadertypes_imageName:
                 n = self._xdrfile.unpack_uhyper()
                 pos = self._xdrfile.get_position()
                 raw = self._xdrfile.get_buffer()[pos:pos+n]
